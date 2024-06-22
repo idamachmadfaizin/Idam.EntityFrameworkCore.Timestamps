@@ -1,7 +1,6 @@
-﻿using Idam.Libs.EF.Attributes;
+﻿using Idam.Libs.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Reflection;
 
 namespace Idam.Libs.EF.Extensions;
 public static class DbSetExtensions
@@ -15,28 +14,24 @@ public static class DbSetExtensions
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    /// <exception cref="InvalidCastException"></exception>
     public static TEntity Restore<TEntity>(this DbSet<TEntity> dbSet, TEntity entity)
-        where TEntity : class
+        where TEntity : class, ISoftDeleteBase
     {
         ArgumentNullException.ThrowIfNull(dbSet, nameof(dbSet));
 
-        Type entityType = entity.GetType();
-        TimeStampsAttribute? timeStampsAttribute = entityType.GetCustomAttribute<TimeStampsAttribute>();
+        if (entity is not ISoftDeleteBase) throw new ArgumentException($"The {nameof(entity)} must be {nameof(ISoftDelete)} or {nameof(ISoftDeleteUnix)}");
 
-        ArgumentNullException.ThrowIfNull(timeStampsAttribute, nameof(timeStampsAttribute));
-
-        var useDeletedAtField = !string.IsNullOrWhiteSpace(timeStampsAttribute.DeletedAtField);
-        if (useDeletedAtField == false)
+        switch (entity)
         {
-            throw new Exception($"The entity '{entityType.Name}' not implement SoftDelete.");
+            case ISoftDelete softDelete:
+                softDelete.DeletedAt = null;
+                break;
+            case ISoftDeleteUnix softDeleteUnix:
+                softDeleteUnix.DeletedAt = null;
+                break;
+            default:
+                break;
         }
-
-        InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.DeletedAtField, entityType, timeStampsAttribute);
-
-        PropertyInfo? deletedAtProperty = useDeletedAtField ? entityType.GetProperty(timeStampsAttribute.DeletedAtField!) : null;
-
-        deletedAtProperty!.SetValue(entity, null, null);
 
         return entity;
     }
@@ -49,30 +44,24 @@ public static class DbSetExtensions
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="InvalidCastException"></exception>
     public static EntityEntry<TEntity> ForceRemove<TEntity>(this DbSet<TEntity> dbSet, TEntity entity)
-        where TEntity : class
+        where TEntity : class, ISoftDeleteBase
     {
         ArgumentNullException.ThrowIfNull(dbSet, nameof(dbSet));
 
-        Type entityType = entity.GetType();
-        TimeStampsAttribute? timeStampsAttribute = entityType.GetCustomAttribute<TimeStampsAttribute>();
+        if (entity is not ISoftDeleteBase) throw new ArgumentException($"The {nameof(entity)} must be {nameof(ISoftDelete)} or {nameof(ISoftDeleteUnix)}");
 
-        ArgumentNullException.ThrowIfNull(timeStampsAttribute, nameof(timeStampsAttribute));
-
-        var useDeletedAtField = !string.IsNullOrWhiteSpace(timeStampsAttribute.DeletedAtField);
-        if (useDeletedAtField == false)
+        switch (entity)
         {
-            throw new Exception($"The entity '{entityType.Name}' not implement SoftDelete.");
+            case ISoftDelete softDelete:
+                softDelete.DeletedAt = DateTime.UtcNow;
+                break;
+            case ISoftDeleteUnix softDeleteUnix:
+                softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                break;
+            default:
+                break;
         }
-
-        InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.DeletedAtField, entityType, timeStampsAttribute);
-
-        PropertyInfo? deletedAtProperty = useDeletedAtField ? entityType.GetProperty(timeStampsAttribute.DeletedAtField!) : null;
-
-        var now = timeStampsAttribute.TimeStampsType.GetMapValue();
-
-        deletedAtProperty!.SetValue(entity, now, null);
 
         return dbSet.Remove(entity);
     }

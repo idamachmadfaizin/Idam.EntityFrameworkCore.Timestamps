@@ -1,9 +1,8 @@
-﻿using Idam.Libs.EF.Attributes;
+﻿using Idam.Libs.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Idam.Libs.EF.Extensions;
 
@@ -16,7 +15,6 @@ public static class DbContextExtensions
     /// Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
     /// </summary>
     /// <param name="changeTracker">The change tracker.</param>
-    /// <exception cref="InvalidCastException"></exception>
     public static void AddTimestamps(this ChangeTracker changeTracker)
     {
         foreach (EntityEntry entityEntry in changeTracker.Entries())
@@ -29,69 +27,67 @@ public static class DbContextExtensions
     /// Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
     /// </summary>
     /// <param name="entityEntry">The entity entry.</param>
-    /// <exception cref="InvalidCastException"></exception>
     private static void AddTimestamps(this EntityEntry? entityEntry)
     {
         if (entityEntry is null) return;
 
-        TimeStampsAttribute? timeStampsAttribute = entityEntry.Entity.GetType().GetCustomAttribute<TimeStampsAttribute>();
-
-        if (timeStampsAttribute is null) return;
-
-        // current datetime
-        var now = timeStampsAttribute.TimeStampsType.GetMapValue();
-
-        Type entityType = entityEntry.Entity.GetType();
-
-        var useCreatedAtField = !string.IsNullOrWhiteSpace(timeStampsAttribute.CreatedAtField);
-        var useUpdatedAtField = !string.IsNullOrWhiteSpace(timeStampsAttribute.UpdatedAtField);
-        var useDeletedAtField = !string.IsNullOrWhiteSpace(timeStampsAttribute.DeletedAtField);
-
-        PropertyInfo? createdAtProperty = useCreatedAtField ? entityType.GetProperty(timeStampsAttribute.CreatedAtField!) : null;
-        PropertyInfo? updatedAtProperty = useUpdatedAtField ? entityType.GetProperty(timeStampsAttribute.UpdatedAtField!) : null;
-        PropertyInfo? deletedAtProperty = useDeletedAtField ? entityType.GetProperty(timeStampsAttribute.DeletedAtField!) : null;
-
         switch (entityEntry.State)
         {
-            case EntityState.Modified:
-                InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.UpdatedAtField, entityType, timeStampsAttribute);
-
-                if (useUpdatedAtField)
-                {
-                    updatedAtProperty!.SetValue(entityEntry.Entity, now, null);
-                }
-                break;
-
             case EntityState.Added:
-                InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.CreatedAtField, entityType, timeStampsAttribute);
-                InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.UpdatedAtField, entityType, timeStampsAttribute);
-
-                if (useCreatedAtField)
-                {
-                    createdAtProperty!.SetValue(entityEntry.Entity, now, null);
-                }
-
-                if (useUpdatedAtField)
-                {
-                    updatedAtProperty!.SetValue(entityEntry.Entity, now, null);
-                }
+            case EntityState.Modified:
+                UpdateTimeStamps(entityEntry.Entity, entityEntry.State);
                 break;
 
             case EntityState.Deleted:
-                InvalidCastValidationException.ThrowIfInvalidTimeStamps(timeStampsAttribute.DeletedAtField, entityType, timeStampsAttribute);
-
-                if (useDeletedAtField)
+                if (entityEntry.Entity is ISoftDelete softDelete && softDelete.DeletedAt is null)
                 {
-                    var value = deletedAtProperty!.GetValue(entityEntry.Entity);
-
-                    if (value is null)
-                    {
-                        entityEntry.State = EntityState.Modified;
-                        deletedAtProperty.SetValue(entityEntry.Entity, now, null);
-                    }
+                    entityEntry.State = EntityState.Modified;
+                    softDelete.DeletedAt = DateTime.UtcNow;
+                }
+                else if (entityEntry.Entity is ISoftDeleteUnix softDeleteUnix && softDeleteUnix.DeletedAt is null)
+                {
+                    entityEntry.State = EntityState.Modified;
+                    softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
                 break;
 
+            default:
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Updates the time stamps.
+    /// </summary>
+    /// <param name="entity">The entity.</param>
+    /// <param name="entityState">State of the entity.</param>
+    private static void UpdateTimeStamps(object entity, EntityState entityState)
+    {
+        if (entityState is not EntityState.Added and not EntityState.Modified) return;
+
+        switch (entity)
+        {
+            case ITimeStamps timeStamps:
+                var now = DateTime.UtcNow;
+
+                timeStamps.UpdatedAt = now;
+
+                if (entityState == EntityState.Added)
+                {
+                    timeStamps.CreatedAt = now;
+                }
+                break;
+
+            case ITimeStampsUnix timeStampsUnix:
+                var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                timeStampsUnix.UpdatedAt = nowUnix;
+
+                if (entityState == EntityState.Added)
+                {
+                    timeStampsUnix.CreatedAt = nowUnix;
+                }
+                break;
             default:
                 break;
         }
@@ -103,9 +99,9 @@ public static class DbContextExtensions
     /// <param name="builder">The builder.</param>
     public static void AddSoftDeleteFilter(this ModelBuilder builder)
     {
-        IEnumerable<IMutableEntityType> mutables = builder.Model.GetEntityTypes();
+        var mutables = builder.Model.GetEntityTypes();
 
-        foreach (IMutableEntityType mutable in mutables)
+        foreach (var mutable in mutables)
         {
             builder.AddSoftDeleteFilter(mutable);
         }
@@ -120,19 +116,24 @@ public static class DbContextExtensions
     {
         if (mutable is null) return;
 
-        TimeStampsAttribute? timeStampsAttribute = mutable.ClrType.GetCustomAttribute<TimeStampsAttribute>();
+        if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
+            !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
 
-        if (timeStampsAttribute is null || string.IsNullOrWhiteSpace(timeStampsAttribute.DeletedAtField)) return;
+        var propertyType = typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType)
+            ? typeof(DateTime?)
+            : typeof(long?);
 
-        ParameterExpression parameter = Expression.Parameter(mutable.ClrType, "e");
+        var parameter = Expression.Parameter(mutable.ClrType, "e");
+        //Type[] typeArguments = [typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) ? typeof(DateTime?) : typeof(long?)];
 
-        Type[] typeArguments = new[] { timeStampsAttribute.TimeStampsType.GetNullableMapType() };
+        //var body = Expression.Equal(
+        //    Expression.Call(typeof(Microsoft.EntityFrameworkCore.EF), nameof(Microsoft.EntityFrameworkCore.EF.Property), typeArguments, parameter, Expression.Constant(nameof(ISoftDelete.DeletedAt))),
+        //    Expression.Constant(null));
 
-        BinaryExpression body = Expression.Equal(
-                Expression.Call(typeof(Microsoft.EntityFrameworkCore.EF), nameof(Microsoft.EntityFrameworkCore.EF.Property), typeArguments, parameter, Expression.Constant(timeStampsAttribute.DeletedAtField)),
-                Expression.Constant(null));
+        var property = Expression.Property(parameter, nameof(ISoftDelete.DeletedAt));
+        var body = Expression.Equal(property, Expression.Constant(null, propertyType));
 
-        LambdaExpression expression = Expression.Lambda(body, parameter);
+        var expression = Expression.Lambda(body, parameter);
 
         builder.Entity(mutable.ClrType).HasQueryFilter(expression);
     }
