@@ -12,24 +12,26 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Idam.Libs.EF.Sample.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230606055351_CreateFoosTable")]
-    partial class CreateFoosTable
+    [Migration("20240621233812_CreateUnixsTable")]
+    partial class CreateUnixsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Foo", b =>
+            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Unix", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long>("CreatedAt")
                         .HasColumnType("bigint");
@@ -51,7 +53,7 @@ namespace Idam.Libs.EF.Sample.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Foos");
+                    b.ToTable("Unixs");
                 });
 #pragma warning restore 612, 618
         }

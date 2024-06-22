@@ -2,11 +2,12 @@
 
 namespace Idam.Libs.EF.Sample.Models.Dto;
 
-public class FooCreateDto
+public class UnixUpdateDto
 {
-    [Required]
+    public int Id { get; set; }
+
     [StringLength(191)]
-    public string Name { get; set; } = default!;
+    public required string Name { get; set; }
 
     [StringLength(191)]
     public string? Description { get; set; }

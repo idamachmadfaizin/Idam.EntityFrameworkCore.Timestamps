@@ -2,7 +2,7 @@
 
 namespace Idam.Libs.EF.Sample.Models.Dto;
 
-public class BooCreateDto
+public class UnixCreateDto
 {
     [Required]
     [StringLength(191)]

@@ -2,13 +2,12 @@
 
 namespace Idam.Libs.EF.Sample.Models.Dto;
 
-public class FooUpdateDto
+public class DtUpdateDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    [Required]
     [StringLength(191)]
-    public string Name { get; set; } = default!;
+    public required string Name { get; set; }
 
     [StringLength(191)]
     public string? Description { get; set; }

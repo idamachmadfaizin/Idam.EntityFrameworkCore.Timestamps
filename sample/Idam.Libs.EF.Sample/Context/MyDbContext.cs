@@ -4,14 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Idam.Libs.EF.Sample.Context;
 
-public class MyDbContext : DbContext
+public class MyDbContext(DbContextOptions options) : DbContext(options)
 {
-    public MyDbContext(DbContextOptions options) : base(options)
-    {
-    }
-
-    public DbSet<Foo> Foos { get; set; }
-    public DbSet<Boo> Boos { get; set; }
+    public DbSet<Unix> Unixs { get; set; }
+    public DbSet<Dt> Dts { get; set; }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {

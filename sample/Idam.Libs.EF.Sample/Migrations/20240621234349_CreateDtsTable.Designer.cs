@@ -12,24 +12,26 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Idam.Libs.EF.Sample.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230606170553_CreateBoosTable")]
-    partial class CreateBoosTable
+    [Migration("20240621234349_CreateDtsTable")]
+    partial class CreateDtsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Boo", b =>
+            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Dt", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -51,14 +53,16 @@ namespace Idam.Libs.EF.Sample.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Boos");
+                    b.ToTable("Dts");
                 });
 
-            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Foo", b =>
+            modelBuilder.Entity("Idam.Libs.EF.Sample.Models.Entity.Unix", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long>("CreatedAt")
                         .HasColumnType("bigint");
@@ -80,7 +84,7 @@ namespace Idam.Libs.EF.Sample.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Foos");
+                    b.ToTable("Unixs");
                 });
 #pragma warning restore 612, 618
         }

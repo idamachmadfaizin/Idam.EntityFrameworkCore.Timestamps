@@ -1,21 +1,21 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Idam.Libs.EF.Sample.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateFoosTable : Migration
+    public partial class CreateUnixsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Foos",
+                name: "Unixs",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(191)", maxLength: 191, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(191)", maxLength: 191, nullable: true),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: false),
@@ -24,7 +24,7 @@ namespace Idam.Libs.EF.Sample.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Foos", x => x.Id);
+                    table.PrimaryKey("PK_Unixs", x => x.Id);
                 });
         }
 
@@ -32,7 +32,7 @@ namespace Idam.Libs.EF.Sample.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Foos");
+                name: "Unixs");
         }
     }
 }

@@ -1,37 +1,41 @@
 ﻿using Idam.Libs.EF.Interfaces;
-using Idam.Libs.EF.Sample.Attributes;
 using Idam.Libs.EF.Sample.Models.Dto;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Idam.Libs.EF.Sample.Models.Entity;
 
 /// <summary>
-/// Foo entity
+/// The Unix entity
 /// </summary>
-[UnixTimeStamps]
-public class Foo : IGuidEntity, ITimeStampsUnix, ISoftDeleteUnix
+/// <seealso cref="ITimeStampsUnix" />
+/// <seealso cref="ISoftDeleteUnix" />
+public class Unix : ITimeStampsUnix, ISoftDeleteUnix
 {
-    public Foo()
+    public Unix()
     {
     }
 
-    public Foo(FooCreateDto dto)
+    [SetsRequiredMembers]
+    public Unix(UnixCreateDto dto)
     {
         this.Name = dto.Name;
         this.Description = dto.Description;
     }
 
-    public Foo(FooUpdateDto dto)
+    [SetsRequiredMembers]
+    public Unix(UnixUpdateDto dto)
     {
         this.Id = dto.Id;
         this.Name = dto.Name;
         this.Description = dto.Description;
     }
 
-    public Guid Id { get; set; }
+    [Key]
+    public int Id { get; set; }
 
     [StringLength(191)]
-    public string Name { get; set; } = default!;
+    public required string Name { get; set; }
 
     [StringLength(191)]
     public string? Description { get; set; }
