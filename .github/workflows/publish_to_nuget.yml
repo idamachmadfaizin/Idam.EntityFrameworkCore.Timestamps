@@ -7,9 +7,9 @@ on:
       - 6-create-gh-action-to-publish-to-nugetcom
 
 env:
-  dotnetVersion: 6.x.x
-  testProjectPath: test/Idam.Libs.EF.Tests
-  srcProjectPath: src/Idam.Libs.EF
+  dotnetVersion: 8.x.x
+  testProjectPath: Idam.Libs.EF.Tests
+  srcProjectPath: Idam.Libs.EF
 
 jobs:
   test:
