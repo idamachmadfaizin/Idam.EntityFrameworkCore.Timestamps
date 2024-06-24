@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Idam.Libs.EF\Idam.Libs.EF.csproj" />
+    <ProjectReference Include="..\Idam.Libs.EF\Idam.Libs.EF.csproj" />
   </ItemGroup>
 
 </Project>
