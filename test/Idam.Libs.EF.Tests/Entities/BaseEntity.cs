@@ -1,17 +1,28 @@
-﻿using Idam.Libs.EF.Interfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Idam.Libs.EF.Tests.Entities;
 /// <summary>
 /// Base Entity
 /// </summary>
 /// <seealso cref="IGuidEntity" />
-public class BaseEntity : IGuidEntity
+public abstract class BaseEntity
 {
-    public Guid Id { get; set; }
+    protected BaseEntity()
+    {
+    }
+
+    [SetsRequiredMembers]
+    protected BaseEntity(string name)
+    {
+        Name = name;
+    }
+
+    [Key]
+    public int Id { get; set; }
 
     [StringLength(191)]
-    public string Name { get; set; } = default!;
+    public required string Name { get; set; }
 
     [StringLength(191)]
     public string? Description { get; set; }

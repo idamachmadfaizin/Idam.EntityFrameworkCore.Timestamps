@@ -1,4 +1,5 @@
 using Idam.Libs.EF.Tests.Context;
+using Idam.Libs.EF.Tests.Ekstensions;
 using Idam.Libs.EF.Tests.Faker;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,37 +8,29 @@ namespace Idam.Libs.EF.Tests.Tests;
 public abstract class BaseTest
 {
     protected readonly TestDbContext _context;
-
-    protected readonly AooFaker _aooFaker;
-    protected readonly BooFaker _booFaker;
-    protected readonly CooFaker _cooFaker;
-    protected readonly DooFaker _dooFaker;
-    protected readonly EooFaker _eooFaker;
-    protected readonly FooFaker _fooFaker;
-    protected readonly GooFaker _gooFaker;
-
-    protected readonly DateTime utcMinValue;
+    protected readonly DtFaker _dtFaker;
+    protected readonly UnixFaker _unixFaker;
+    protected readonly DateTime _utcMinValue;
+    protected readonly long _unixMinValue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseTest"/> class.
     /// </summary>
     public BaseTest()
     {
-        this._context = new TestDbContext();
-        this._context.Database.EnsureCreated();
+        _context = new();
+        _context.Database.EnsureCreated();
 
-        this._aooFaker = new();
-        this._booFaker = new();
-        this._cooFaker = new();
-        this._dooFaker = new();
-        this._eooFaker = new();
-        this._fooFaker = new();
-        this._gooFaker = new();
+        _dtFaker = new();
+        _unixFaker = new();
 
-        this.utcMinValue = DateTime.MinValue.ToUniversalTime();
+        _utcMinValue = DateTime.MinValue.ToUniversalTime();
+        _unixMinValue = DateTime.MinValue.ToUniversalTime().ToUnixTimeMilliseconds();
     }
 
-    /// <summary>Generic add async</summary>
+    /// <summary>
+    /// Generic add async.
+    /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -46,14 +39,35 @@ public abstract class BaseTest
     {
         Assert.NotNull(data);
 
-        this._context.Set<TEntity>().Add(data);
-        var created = await this._context.SaveChangesAsync();
+        await _context.Set<TEntity>().AddAsync(data);
+        var created = await _context.SaveChangesAsync();
 
         Assert.True(created > 0);
         return data;
     }
 
-    /// <summary>Generic Delete async</summary>
+    /// <summary>
+    /// Generic Adds the range asynchronous.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="datas">The datas.</param>
+    /// <returns></returns>
+    protected async Task<IEnumerable<TEntity>> AddRangeAsync<TEntity>(List<TEntity>? datas)
+        where TEntity : class
+    {
+        Assert.NotNull(datas);
+        Assert.NotEmpty(datas);
+
+        await _context.Set<TEntity>().AddRangeAsync(datas);
+        var created = await _context.SaveChangesAsync();
+
+        Assert.True(created > 0);
+        return datas;
+    }
+
+    /// <summary>
+    /// Generic Delete async.
+    /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -62,9 +76,9 @@ public abstract class BaseTest
     {
         Assert.NotNull(data);
 
-        this._context.Set<TEntity>().Remove(data);
-        this._context.Entry(data).State = EntityState.Deleted;
-        var removed = await this._context.SaveChangesAsync();
+        _context.Set<TEntity>().Remove(data);
+        _context.Entry(data).State = EntityState.Deleted;
+        var removed = await _context.SaveChangesAsync();
 
         Assert.True(removed > 0);
         return data;

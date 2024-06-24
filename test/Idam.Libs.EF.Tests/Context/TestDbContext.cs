@@ -1,5 +1,5 @@
 ﻿using Idam.Libs.EF.Extensions;
-using Idam.Libs.EF.Tests.Entities;
+using Idam.Libs.EF.Sample.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Idam.Libs.EF.Tests.Context;
@@ -13,13 +13,8 @@ public class TestDbContext : DbContext
     {
     }
 
-    public DbSet<Aoo> Aoos { get; set; }
-    public DbSet<Boo> Boos { get; set; }
-    public DbSet<Coo> Coos { get; set; }
-    public DbSet<Doo> Doos { get; set; }
-    public DbSet<Eoo> Eoos { get; set; }
-    public DbSet<Foo> Foos { get; set; }
-    public DbSet<Goo> Goos { get; set; }
+    public DbSet<Dt> Dts { get; set; }
+    public DbSet<Unix> Unixs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
