@@ -14,7 +14,7 @@
 - Removed IGuidEntity.</PackageReleaseNotes>
 		<PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</RepositoryUrl>
-		<Description>A library for handling TimeStamps and SoftDelete as UTC DateTime or Unix in EntityFramework.</Description>
+		<Description>A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.</Description>
 		<Version>8.0.0</Version>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
