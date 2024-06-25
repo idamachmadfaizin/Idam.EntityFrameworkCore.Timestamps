@@ -12,8 +12,8 @@
 - Update Microsoft.EntityFrameworkCore to 8.0.6.
 - Removed TimeStampsAttribute (use ColumnAttribute instead).
 - Removed IGuidEntity.</PackageReleaseNotes>
-		<PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</RepositoryUrl>
 		<Description>A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.</Description>
 		<Version>8.0.0</Version>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
