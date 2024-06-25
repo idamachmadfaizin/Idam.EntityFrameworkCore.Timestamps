@@ -12,15 +12,14 @@ If you like or are using this project please give it a star. Thanks!
 
 - Soft delete (DeletedAt).
 - Timestamps (CreatedAt, UpdatedAt).
-- Custom Timestamps fields.
 
->Both features support DateTime, UTC DateTime, and [Unix Time Milliseconds](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds?view=net-7.0) format.
+>Both features support UTC DateTime and [Unix Time Milliseconds](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds?view=net-7.0) format.
 >
 >Example of Unix Time Milliseconds: [currentmillis.com](https://currentmillis.com)
 
 ## Get started
 
-run this command to install
+Run this command to install
 
 ```sh
 Install-Package Idam.Libs.EF
@@ -59,39 +58,28 @@ dotnet tool install Idam.Libs.EF
     }
     ```
 
-2. Add an attribute (`TimeStamps` or `TimeStampsUtc` or `TimeStampsUnix`) to your entity. You can also implement an Interface (`ITimeStamps` or `ITimeStampsUnix`) according attribute you use.
+2. Implement an Interface (`ITimeStamps` or `ITimeStampsUnix`) to your entity.
 
     ```cs
-    using Idam.Libs.EF.Attributes;
     using Idam.Libs.EF.Interfaces;
 
     /// BaseEntity
-    public class BaseEntity
+    public abstract class BaseEntity
     {
         public int Id { get; set; }
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
     }
 
-    /// Using DateTime Format
-    [TimeStamps]
-    public class Doo : BaseEntity, ITimeStamps
-    {
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-    }
-
     /// Using UTC DateTime Format
-    [TimeStampsUtc]
-    public class UtcDoo : BaseEntity, ITimeStamps
+    public class Dt : BaseEntity, ITimeStamps
     {
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
     /// Using Unix Format
-    [TimeStampsUnix]
-    public class Foo : ITimeStampsUnix
+    public class Unix : ITimeStampsUnix
     {
         public long CreatedAt { get; set; }
         public long UpdatedAt { get; set; }
@@ -130,29 +118,19 @@ dotnet tool install Idam.Libs.EF
     }
     ```
 
-2. Add an attribute (`TimeStamps` or `TimeStampsUtc` or `TimeStampsUnix`) to your entity. You can also implement an Interface (`ISoftDelete` or `ISoftDeleteUnix`) according attribute you use.
+2. Implement an Interface (`ISoftDelete` or `ISoftDeleteUnix`) to your entity.
 
     ```cs
-    using Idam.Libs.EF.Attributes;
     using Idam.Libs.EF.Interfaces;
 
-    /// Using DateTime Format
-    [TimeStamps]
-    public class Doo : BaseEntity, ISoftDelete
-    {
-        public DateTime? DeletedAt { get; set; }
-    }
-
     /// Using UTC DateTime Format
-    [TimeStampsUtc]
-    public class UtcDoo : BaseEntity, ISoftDelete
+    public class Dt : BaseEntity, ISoftDelete
     {
         public DateTime? DeletedAt { get; set; }
     }
 
     /// Using Unix Format
-    [TimeStampsUnix]
-    public class Foo : BaseEntity, ISoftDeleteUnix
+    public class Unix : BaseEntity, ISoftDeleteUnix
     {
         public long? DeletedAt { get; set; }
     }
@@ -168,40 +146,40 @@ using Idam.Libs.EF.Extensions;
 /// Your context
 public class MyDbContext : DbContext
 {
-    public DbSet<Foo> Foos { get; set; }
+    public DbSet<Dt> Dts { get; set; }
 }
 
-/// Foo Controller
-public class FooController
+/// Dt Controller
+public class DtController
 {
     readonly MyDbContext _context;
 
-    public async Task<IActionResult> RestoreAsync(Foo foo)
+    public async Task<IActionResult> RestoreAsync(Dt dt)
     {
-        Foo restoredFoo = _context.Foos.Restore(foo);
+        var restored = _context.Dts.Restore(dt);
         await context.SaveChangesAsync();
         
-        return Ok(restoredFoo);
+        return Ok(restored);
     }
 }
 ```
 
-#### ForceRemove
+#### Force Remove
 
 The SoftDelete has a `ForceRemove()` function, so you can permanently remove the data.
 
 ```cs
-/// Foo Controller
-public class FooController
+/// Dt Controller
+public class DtController
 {
     readonly MyDbContext _context;
 
-    public async Task<IActionResult> ForceRemoveAsync(Foo foo)
+    public async Task<IActionResult> ForceRemoveAsync(Dt dt)
     {
-        _context.Foos.ForceRemove(foo);
+        _context.Dts.ForceRemove(dt);
         await context.SaveChangesAsync();
         
-        return Ok(restoredFoo);
+        return Ok();
     }
 }
 ```
@@ -211,12 +189,12 @@ public class FooController
 The SoftDelete has a `Trashed()` function to check if current data is deleted.
 
 ```cs
-/// Foo Controller
-public class FooController
+/// Dt Controller
+public class DtController
 {
-    public IActionResult IsDeletedFoo(Foo foo)
+    public IActionResult IsDeleted(Dt dt)
     {
-        bool isDeleted = foo.Trashed();
+        bool isDeleted = dt.Trashed();
         
         return Ok(isDeleted);
     }
@@ -230,96 +208,31 @@ public class FooController
 By default the deleted data filtered from the query, if you want to get the deleted data you can ignore the global softdelete filter by using `IgnoreQueryFilters()`.
 
 ```cs
-/// Foo Controller
-public class FooController
+/// Dt Controller
+public class DtController
 {
     readonly MyDbContext _context;
 
     public async Task<IActionResult> GetAllDeletedAsync()
     {
-        var deletedFoos = await _context.Foos
+        var deleteds = await _context.Dts
             .IgnoreQueryFilters()
             .Where(x => x.DeletedAt != null)
             .ToListAsync();
 
-        return Ok(deletedFoos);
+        return Ok(deleteds);
     }
 }
 ```
 
 ### Using Custom TimeStamps fields
 
-By default, the TimeStamps attribute uses CreatedAt, UpdatedAt, and DeletedAt as field names. It's possible to customize the TimeStamps fields.
-
-1. Create your own TimeStamps attribute.
-
-    ```cs
-    public class MyTimeStampsAttribute : TimeStampsAttribute
-    {
-        public override TimeStampsType TimeStampsType { get; set; } = TimeStampsType.UtcDateTime;
-        public override string? CreatedAtField { get; set; } = "AddedAt";
-        public override string? UpdatedAtField { get; set; } = "EditedAt";
-        public override string? DeletedAtField { get; set; } = "RemovedAt";
-    }
-    ```
-
-2. Add the new attribute to your entity.
-
-    ```cs
-    [MyTimeStamps]
-    public class Doo : BaseEntity
-    {
-        public DateTime AddedAt { get; set; }
-        public DateTime EditedAt { get; set; }
-        public DateTime? RemovedAt { get; set; }
-    }
-    ```
-
-    > Tips: Create your interface according to your own TimeStamps attribute.
-
-### Using just few TimeStamps fields
-
-You can use just a few TimeStamps fields by filling in null or string empty to fields you don't use.
-
-1. Create your own TimeStamps attribute.
-
-    ```cs
-    public class MyTimeStampsAttribute : TimeStampsAttribute
-    {
-        public override TimeStampsType TimeStampsType { get; set; } = TimeStampsType.UtcDateTime;
-        public override string? CreatedAtField { get; set; } = "";
-        public override string? UpdatedAtField { get; set; } = "EditedAt";
-        public override string? DeletedAtField { get; set; } = "RemovedAt";
-    }
-    ```
-
-2. Add the new attribute to your entity.
-
-    ```cs
-    [MyTimeStamps]
-    public class Doo : BaseEntity
-    {
-        public DateTime EditedAt { get; set; }
-        public DateTime? RemovedAt { get; set; }
-    }
-    ```
-
-### Using IGuidEntity
-
-An Interface to implement Id as Guid instead of int.
-
-```cs
-using Idam.Libs.EF.Interfaces;
-
-public class Foo : IGuidEntity
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = default!;
-    public string? Description { get; set; }
-}
-```
+By default, the TimeStamps interface uses CreatedAt, UpdatedAt, and DeletedAt as field names. To customize the TimeStamps fields simplify just add ColumnAttribute to the fields.
 
 ## Migrating
-Migrating from 2.1.0
 
-1. Add [TimeStampsUtc] or [TimeStampsUnix] attribute to your entities according to your TimeStamps data type before.
+Migrating from 7.0.0
+
+1. Remove [TimeStampsAttribute], [TimeStampsUnixAttribute], and [TimeStampsUtcAttribute].
+2. If you use custom field from TimeStampsAttribute, then add the ColumnAttribute to each TimeStamps fields.
+3. Remove/Create your own IGuidEntity.
