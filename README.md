@@ -1,4 +1,4 @@
-# Idam.Libs.EF
+# Idam.EFTimestamps
 
 [![NuGet](https://img.shields.io/nuget/v/Idam.EFTimestamps.svg)](https://www.nuget.org/packages/Idam.EFTimestamps) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EFTimestamps/actions/workflows/test.yml)
 
@@ -22,13 +22,13 @@ If you like or are using this project please give it a star. Thanks!
 Run this command to install
 
 ```sh
-Install-Package Idam.Libs.EF
+Install-Package Idam.EFTimestamps
 ```
 
 or
 
 ```sh
-dotnet tool install Idam.Libs.EF
+dotnet tool install Idam.EFTimestamps
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ dotnet tool install Idam.Libs.EF
 1. Add `AddTimestamps()` in your context.
 
     ```cs
-    using Idam.Libs.EF.Extensions;
+    using Idam.EFTimestamps.Extensions;
 
     public class MyDbContext : DbContext
     {
@@ -61,7 +61,7 @@ dotnet tool install Idam.Libs.EF
 2. Implement an Interface (`ITimeStamps` or `ITimeStampsUnix`) to your entity.
 
     ```cs
-    using Idam.Libs.EF.Interfaces;
+    using Idam.EFTimestamps.Interfaces;
 
     /// BaseEntity
     public abstract class BaseEntity
@@ -91,7 +91,7 @@ dotnet tool install Idam.Libs.EF
 1. Add `AddTimestamps()` and `AddSoftDeleteFilter()` in your context.
 
     ```cs
-    using Idam.Libs.EF.Extensions;
+    using Idam.EFTimestamps.Extensions;
 
     public class MyDbContext : DbContext
     {
@@ -121,7 +121,7 @@ dotnet tool install Idam.Libs.EF
 2. Implement an Interface (`ISoftDelete` or `ISoftDeleteUnix`) to your entity.
 
     ```cs
-    using Idam.Libs.EF.Interfaces;
+    using Idam.EFTimestamps.Interfaces;
 
     /// Using UTC DateTime Format
     public class Dt : BaseEntity, ISoftDelete
@@ -141,7 +141,7 @@ dotnet tool install Idam.Libs.EF
 The SoftDelete has a `Restore()` function, so you can restore the deleted data.
 
 ```cs
-using Idam.Libs.EF.Extensions;
+using Idam.EFTimestamps.Extensions;
 
 /// Your context
 public class MyDbContext : DbContext
