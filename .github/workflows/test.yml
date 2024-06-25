@@ -29,20 +29,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget
 
-      - name: Restore Idam.EFTimestamps dependencies
-        run: dotnet restore ${{ env.srcProjectPath }}
-
-      - name: Build Idam.EFTimestamps library
-        run: dotnet build ${{ env.srcProjectPath }} --configuration Release --no-restore
-
-      - name: Test Idam.EFTimestamps
-        run: dotnet test ${{ env.srcProjectPath }} --no-restore --verbosity normal
-
-      - name: Restore Idam.EFTimestamps.Tests dependencies 
+      - name: Restore dependencies 
         run: dotnet restore ${{ env.testProjectPath }}
 
-      - name: Build Idam.EFTimestamps.Tests library
+      - name: Build library
         run: dotnet build ${{ env.testProjectPath }} --configuration Release --no-restore
 
-      - name: Test Idam.EFTimestamps.Tests
+      - name: Test
         run: dotnet test ${{ env.testProjectPath }} --no-restore --verbosity normal
