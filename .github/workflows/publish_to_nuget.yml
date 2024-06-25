@@ -8,8 +8,8 @@ on:
 
 env:
   dotnetVersion: 8.x.x
-  testProjectPath: Idam.Libs.EF.Tests
-  srcProjectPath: Idam.Libs.EF
+  testProjectPath: Idam.EFTimestamps.Tests
+  srcProjectPath: Idam.EFTimestamps
 
 jobs:
   test:
