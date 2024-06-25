@@ -11,7 +11,7 @@
 		<PackageReleaseNotes>- Update to .net 8.
 - Update Microsoft.EntityFrameworkCore to 8.0.6.
 - Removed TimeStampsAttribute (use ColumnAttribute instead).
-- Remoted IGuidEntity.</PackageReleaseNotes>
+- Removed IGuidEntity.</PackageReleaseNotes>
 		<PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/idamachmadfaizin/Idam.Libs.EF</RepositoryUrl>
 		<Description>Idam.Libs.EF is .Net Core (C#) for Entity Framework (EF) Utils.
