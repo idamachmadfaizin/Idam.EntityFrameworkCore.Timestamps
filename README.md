@@ -1,8 +1,8 @@
 # Idam.Libs.EF
 
-[![NuGet](https://img.shields.io/nuget/v/Idam.Libs.EF.svg)](https://www.nuget.org/packages/Idam.Libs.EF) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.Libs.EF/actions/workflows/test.yml)
+[![NuGet](https://img.shields.io/nuget/v/Idam.EFTimestamps.svg)](https://www.nuget.org/packages/Idam.EFTimestamps) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EFTimestamps/actions/workflows/test.yml)
 
-[Idam.Libs.EF](https://github.com/idamachmadfaizin/Idam.Libs.EF) is .Net Core (C#) for Entity Framework (EF) Utils.
+A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework..
 
 ## Give a Star! :star:
 
