@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Idam.EFTimestamps.svg)](https://www.nuget.org/packages/Idam.EFTimestamps) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EFTimestamps/actions/workflows/test.yml)
 
-A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework..
+A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.
 
 ## Give a Star! :star:
 
