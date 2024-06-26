@@ -28,7 +28,7 @@ Install-Package Idam.EFTimestamps
 or
 
 ```sh
-dotnet tool install Idam.EFTimestamps
+dotnet add package Idam.EFTimestamps
 ```
 
 ## Usage
