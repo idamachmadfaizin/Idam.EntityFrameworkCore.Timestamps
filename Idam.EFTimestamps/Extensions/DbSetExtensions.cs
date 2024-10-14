@@ -13,18 +13,18 @@ public static class DbSetExtensions
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
     public static TEntity Restore<TEntity>(this DbSet<TEntity> dbSet, TEntity entity)
         where TEntity : class, ISoftDeleteBase
     {
         ArgumentNullException.ThrowIfNull(dbSet, nameof(dbSet));
 
-        if (entity is not ISoftDeleteBase) throw new ArgumentException($"The {nameof(entity)} must be {nameof(ISoftDelete)} or {nameof(ISoftDeleteUnix)}");
-
         switch (entity)
         {
             case ISoftDelete softDelete:
                 softDelete.DeletedAt = null;
+                break;
+            case ISoftDeleteUtc softDeleteUtc:
+                softDeleteUtc.DeletedAt = null;
                 break;
             case ISoftDeleteUnix softDeleteUnix:
                 softDeleteUnix.DeletedAt = null;
@@ -49,17 +49,16 @@ public static class DbSetExtensions
     {
         ArgumentNullException.ThrowIfNull(dbSet, nameof(dbSet));
 
-        if (entity is not ISoftDeleteBase) throw new ArgumentException($"The {nameof(entity)} must be {nameof(ISoftDelete)} or {nameof(ISoftDeleteUnix)}");
-
         switch (entity)
         {
             case ISoftDelete softDelete:
-                softDelete.DeletedAt = DateTime.UtcNow;
+                softDelete.DeletedAt = DateTime.Now;
+                break;
+            case ISoftDeleteUtc softDeleteUtc:
+                softDeleteUtc.DeletedAt = DateTime.UtcNow;
                 break;
             case ISoftDeleteUnix softDeleteUnix:
                 softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                break;
-            default:
                 break;
         }
 

@@ -1,7 +1,7 @@
 ﻿using Idam.EFTimestamps.Interfaces;
 
 namespace Idam.EFTimestamps.Extensions;
-public static class ISoftDeleteExtensions
+public static class SoftDeleteExtensions
 {
     /// <summary>
     /// Determines whether this instance is deleted.
@@ -15,8 +15,7 @@ public static class ISoftDeleteExtensions
     {
         ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-        Type entityType = entity.GetType();
-
+        var entityType = entity.GetType();
         var deletedAtProperty = entityType.GetProperty(nameof(ISoftDelete.DeletedAt));
 
         ArgumentNullException.ThrowIfNull(deletedAtProperty, nameof(deletedAtProperty));

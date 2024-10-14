@@ -8,41 +8,35 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+if (!builder.Environment.IsProduction()) builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<MyDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+builder.Services.AddDbContext<MyDbContext>(options => { options.UseSqlite("SampleDatabase"); });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
+{
+    app.UseExceptionHandler("/api/ExceptionHandler/HandleError");
+}
+else
 {
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseExceptionHandler("/api/ExceptionHandler/HandleErrorDevelopment");
 }
-else
-{
-    app.UseExceptionHandler("/api/ExceptionHandler/HandleError");
-}
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-};
+}
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapGet("/", () =>
-{
-    return Results.Redirect("/swagger");
-}).ExcludeFromDescription();
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
 app.MapControllers();
 

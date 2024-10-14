@@ -1,14 +1,12 @@
 ﻿namespace Idam.EFTimestamps.Interfaces;
 
 /// <summary>
-/// SoftDelete base
+/// SoftDelete base interface.
 /// </summary>
-public interface ISoftDeleteBase
-{
-}
+public interface ISoftDeleteBase;
 
 /// <summary>
-/// SoftDelete interface using DateTime format
+/// SoftDelete interface using local DateTime format.
 /// </summary>
 public interface ISoftDelete : ISoftDeleteBase
 {
@@ -16,7 +14,15 @@ public interface ISoftDelete : ISoftDeleteBase
 }
 
 /// <summary>
-/// SoftDelete interface using Unix format
+/// SoftDelete interface using UTC DateTime format.
+/// </summary>
+public interface ISoftDeleteUtc : ISoftDeleteBase
+{
+    DateTime? DeletedAt { get; set; }
+}
+
+/// <summary>
+/// SoftDelete interface using Unix format.
 /// </summary>
 public interface ISoftDeleteUnix : ISoftDeleteBase
 {

@@ -17,7 +17,7 @@ public static class DbContextExtensions
     /// <param name="changeTracker">The change tracker.</param>
     public static void AddTimestamps(this ChangeTracker changeTracker)
     {
-        foreach (EntityEntry entityEntry in changeTracker.Entries())
+        foreach (var entityEntry in changeTracker.Entries())
         {
             entityEntry.AddTimestamps();
         }
@@ -39,18 +39,22 @@ public static class DbContextExtensions
                 break;
 
             case EntityState.Deleted:
-                if (entityEntry.Entity is ISoftDelete softDelete && softDelete.DeletedAt is null)
+                switch (entityEntry.Entity)
                 {
-                    entityEntry.State = EntityState.Modified;
-                    softDelete.DeletedAt = DateTime.UtcNow;
-                }
-                else if (entityEntry.Entity is ISoftDeleteUnix softDeleteUnix && softDeleteUnix.DeletedAt is null)
-                {
-                    entityEntry.State = EntityState.Modified;
-                    softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    case ISoftDelete { DeletedAt: null } softDelete:
+                        entityEntry.State = EntityState.Modified;
+                        softDelete.DeletedAt = DateTime.Now;
+                        break;
+                    case ISoftDeleteUtc { DeletedAt: null } softDeleteUtc:
+                        entityEntry.State = EntityState.Modified;
+                        softDeleteUtc.DeletedAt = DateTime.UtcNow;
+                        break;
+                    case ISoftDeleteUnix { DeletedAt: null } softDeleteUnix:
+                        entityEntry.State = EntityState.Modified;
+                        softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        break;
                 }
                 break;
-
             default:
                 break;
         }
@@ -68,21 +72,26 @@ public static class DbContextExtensions
         switch (entity)
         {
             case ITimeStamps timeStamps:
-                var now = DateTime.UtcNow;
-
+                var now = DateTime.Now;
                 timeStamps.UpdatedAt = now;
-
                 if (entityState == EntityState.Added)
                 {
                     timeStamps.CreatedAt = now;
                 }
                 break;
+            
+            case ITimeStampsUtc timeStampsUtc:
+                var nowUtc = DateTime.UtcNow;
+                timeStampsUtc.UpdatedAt = nowUtc;
+                if (entityState == EntityState.Added)
+                {
+                    timeStampsUtc.CreatedAt = nowUtc;
+                }
+                break;
 
             case ITimeStampsUnix timeStampsUnix:
                 var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
                 timeStampsUnix.UpdatedAt = nowUnix;
-
                 if (entityState == EntityState.Added)
                 {
                     timeStampsUnix.CreatedAt = nowUnix;
@@ -99,11 +108,11 @@ public static class DbContextExtensions
     /// <param name="builder">The builder.</param>
     public static void AddSoftDeleteFilter(this ModelBuilder builder)
     {
-        var mutables = builder.Model.GetEntityTypes();
+        var mutableEntityTypes = builder.Model.GetEntityTypes();
 
-        foreach (var mutable in mutables)
+        foreach (var mutableEntityType in mutableEntityTypes)
         {
-            builder.AddSoftDeleteFilter(mutable);
+            builder.AddSoftDeleteFilter(mutableEntityType);
         }
     }
 
@@ -111,12 +120,13 @@ public static class DbContextExtensions
     /// Query Filter to get model where DeletedAt field is null.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <param name="mutable">The mutable.</param>
+    /// <param name="mutable">The mutable entity type.</param>
     private static void AddSoftDeleteFilter(this ModelBuilder builder, IMutableEntityType? mutable)
     {
         if (mutable is null) return;
 
         if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
+            !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
             !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
 
         var propertyType = typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType)
@@ -124,11 +134,6 @@ public static class DbContextExtensions
             : typeof(long?);
 
         var parameter = Expression.Parameter(mutable.ClrType, "e");
-        //Type[] typeArguments = [typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) ? typeof(DateTime?) : typeof(long?)];
-
-        //var body = Expression.Equal(
-        //    Expression.Call(typeof(Microsoft.EntityFrameworkCore.EF), nameof(Microsoft.EntityFrameworkCore.EF.Property), typeArguments, parameter, Expression.Constant(nameof(ISoftDelete.DeletedAt))),
-        //    Expression.Constant(null));
 
         var property = Expression.Property(parameter, nameof(ISoftDelete.DeletedAt));
         var body = Expression.Equal(property, Expression.Constant(null, propertyType));

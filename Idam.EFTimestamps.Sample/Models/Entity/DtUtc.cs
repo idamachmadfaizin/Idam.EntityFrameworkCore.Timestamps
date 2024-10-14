@@ -1,30 +1,28 @@
-﻿using Idam.EFTimestamps.Interfaces;
-using Idam.EFTimestamps.Sample.Models.Dto;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Idam.EFTimestamps.Interfaces;
+using Idam.EFTimestamps.Sample.Models.Dto;
 
 namespace Idam.EFTimestamps.Sample.Models.Entity;
 
-/// <summary>
-/// The DateTime entity.
-/// </summary>
-/// <seealso cref="ITimeStamps" />
-/// <seealso cref="ISoftDelete" />
-public class Dt : ITimeStamps, ISoftDelete
+/// <summary>The DateTime UTC entity.</summary>
+/// <seealso cref="ITimeStampsUtc"/>
+/// <seealso cref="ISoftDeleteUtc"/>
+public class DtUtc : ITimeStampsUtc, ISoftDeleteUtc
 {
-    public Dt()
+    public DtUtc()
     {
     }
-
+    
     [SetsRequiredMembers]
-    public Dt(DtCreateDto dto)
+    public DtUtc(DtUtcCreateDto dto)
     {
         Name = dto.Name;
         Description = dto.Description;
     }
-
+    
     [SetsRequiredMembers]
-    public Dt(DtUpdateDto dto)
+    public DtUtc(DtUtcUpdateDto dto)
     {
         Id = dto.Id;
         Name = dto.Name;

@@ -1,14 +1,21 @@
 ﻿using Idam.EFTimestamps.Extensions;
 using Idam.EFTimestamps.Sample.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Idam.EFTimestamps.Sample.Context;
 
-public class MyDbContext(DbContextOptions options) : DbContext(options)
+public class MyDbContext(DbContextOptions options, IConfiguration configuration) : DbContext(options)
 {
-    public DbSet<Unix> Unixs { get; set; }
-    public DbSet<Dt> Dts { get; set; }
+    public DbSet<Unix> Unixs { get; init; }
+    public DbSet<Dt> Dts { get; init; }
+    public DbSet<DtUtc> DtUtcs { get; init; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+    }
+    
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         ChangeTracker.AddTimestamps();
