@@ -9,6 +9,7 @@ public abstract class BaseTest
 {
     protected readonly TestDbContext _context;
     protected readonly DtFaker _dtFaker;
+    protected readonly DtUtcFaker _dtUtcFaker;
     protected readonly UnixFaker _unixFaker;
     protected readonly DateTime _utcMinValue;
     protected readonly long _unixMinValue;
@@ -22,6 +23,7 @@ public abstract class BaseTest
         _context.Database.EnsureCreated();
 
         _dtFaker = new();
+        _dtUtcFaker = new();
         _unixFaker = new();
 
         _utcMinValue = DateTime.MinValue.ToUniversalTime();

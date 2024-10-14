@@ -14,6 +14,7 @@ public class TestDbContext : DbContext
     }
 
     public DbSet<Dt> Dts { get; set; }
+    public DbSet<DtUtc> DtUtcs { get; set; }
     public DbSet<Unix> Unixs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -8,4 +8,11 @@ internal static class DateTimeExtension
     /// </returns>
     public static long ToUnixTimeMilliseconds(this DateTime dateTime) =>
         new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+    
+    /// <summary>
+    /// Check is a DateTime is in UTC.
+    /// </summary>
+    /// <param name="dateTime"></param>
+    /// <returns></returns>
+    public static bool IsUtc(this DateTime dateTime) => dateTime.Kind == DateTimeKind.Utc;
 }
