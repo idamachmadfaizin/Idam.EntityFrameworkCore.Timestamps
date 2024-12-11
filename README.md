@@ -13,7 +13,9 @@ If you like or are using this project please give it a star. Thanks!
 - Soft delete (DeletedAt).
 - Timestamps (CreatedAt, UpdatedAt).
 
->Both features support UTC DateTime and [Unix Time Milliseconds](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds?view=net-7.0) format.
+> Both features support UTC DateTime
+> and [Unix Time Milliseconds](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds)
+> format.
 >
 >Example of Unix Time Milliseconds: [currentmillis.com](https://currentmillis.com)
 
@@ -58,7 +60,7 @@ dotnet add package Idam.EFTimestamps
     }
     ```
 
-2. Implement an Interface (`ITimeStamps` or `ITimeStampsUnix`) to your entity.
+2. Implement an Interface (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`) to your entity.
 
     ```cs
     using Idam.EFTimestamps.Interfaces;
@@ -70,9 +72,16 @@ dotnet add package Idam.EFTimestamps
         public string Name { get; set; } = default!;
         public string? Description { get; set; }
     }
+    
+    /// Using local DateTime Format
+    public class Dt : BaseEntity, ITimeStamps
+    {
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 
     /// Using UTC DateTime Format
-    public class Dt : BaseEntity, ITimeStamps
+    public class DtUtc : BaseEntity, ITimeStampsUtc
     {
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -118,13 +127,19 @@ dotnet add package Idam.EFTimestamps
     }
     ```
 
-2. Implement an Interface (`ISoftDelete` or `ISoftDeleteUnix`) to your entity.
+2. Implement an Interface (`ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`) to your entity.
 
     ```cs
     using Idam.EFTimestamps.Interfaces;
 
-    /// Using UTC DateTime Format
+    /// Using local DateTime Format
     public class Dt : BaseEntity, ISoftDelete
+    {
+        public DateTime? DeletedAt { get; set; }
+    }
+    
+    /// Using UTC DateTime Format
+    public class Dt : BaseEntity, ISoftDeleteUtc
     {
         public DateTime? DeletedAt { get; set; }
     }
@@ -201,11 +216,12 @@ public class DtController
 }
 ```
 
-> The `Trashed()` function only shows when your entity implements an interface `ISoftDelete` or `ISoftDeleteUnix`.
+> The `Trashed()` function only shows when your entity implements an interface `ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`.
 
-#### Ignore global softdelete filter
+#### Ignore global soft delete filter
 
-By default the deleted data filtered from the query, if you want to get the deleted data you can ignore the global softdelete filter by using `IgnoreQueryFilters()`.
+By default the deleted data filtered from the query, if you want to get the deleted data you can ignore the global
+soft delete filter by using `IgnoreQueryFilters()`.
 
 ```cs
 /// Dt Controller
@@ -227,12 +243,12 @@ public class DtController
 
 ### Using Custom TimeStamps fields
 
-By default, the TimeStamps interface uses CreatedAt, UpdatedAt, and DeletedAt as field names. To customize the TimeStamps fields simplify just add ColumnAttribute to the fields.
+By default, the TimeStamps interface uses CreatedAt, UpdatedAt, and DeletedAt as field names. To customize the
+TimeStamps fields simplify just add ColumnAttribute to the fields.
 
 ## Migrating
 
-Migrating from 7.0.0
+Migrating from 8.0.0
 
-1. Remove [TimeStampsAttribute], [TimeStampsUnixAttribute], and [TimeStampsUtcAttribute].
-2. If you use custom field from TimeStampsAttribute, then add the ColumnAttribute to each TimeStamps fields.
-3. Remove/Create your own IGuidEntity.
+1. Rename the ITimeStamps to ITimeStampsUtc.
+2. Rename the ISoftDelete to ISoftDeleteUtc.
