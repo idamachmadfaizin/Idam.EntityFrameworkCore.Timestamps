@@ -1,14 +1,15 @@
 ﻿using Idam.EFTimestamps.Interfaces;
 
 namespace Idam.EFTimestamps.Extensions;
+
 public static class SoftDeleteExtensions
 {
     /// <summary>
-    /// Determines whether this instance is deleted.
+    ///     Determines whether this instance is deleted.
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns>
-    ///   <c>true</c> if the specified entity is deleted; otherwise, <c>false</c>.
+    ///     <c>true</c> if the specified entity is deleted; otherwise, <c>false</c>.
     /// </returns>
     /// <exception cref="ArgumentNullException"></exception>
     public static bool Trashed(this ISoftDeleteBase entity)

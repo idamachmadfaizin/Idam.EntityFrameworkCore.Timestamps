@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Idam.EFTimestamps.Extensions;
+
 public static class DbSetExtensions
 {
     /// <summary>
-    /// Restores the specified entity.
+    ///     Restores the specified entity.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="dbSet">The database set.</param>
@@ -29,15 +30,13 @@ public static class DbSetExtensions
             case ISoftDeleteUnix softDeleteUnix:
                 softDeleteUnix.DeletedAt = null;
                 break;
-            default:
-                break;
         }
 
         return entity;
     }
 
     /// <summary>
-    /// Forces the remove.
+    ///     Forces the remove.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="dbSet">The database set.</param>
