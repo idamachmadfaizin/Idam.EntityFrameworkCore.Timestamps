@@ -1,12 +1,12 @@
-﻿using Idam.EFTimestamps.Interfaces;
-using Idam.EFTimestamps.Sample.Models.Dto;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using Idam.EFTimestamps.Interfaces;
+using Idam.EFTimestamps.Sample.Models.Dto;
 
 namespace Idam.EFTimestamps.Sample.Models.Entity;
 
 /// <summary>
-/// The DateTime entity.
+///     The DateTime entity.
 /// </summary>
 /// <seealso cref="ITimeStamps" />
 /// <seealso cref="ISoftDelete" />
@@ -31,18 +31,15 @@ public class Dt : ITimeStamps, ISoftDelete
         Description = dto.Description;
     }
 
-    [Key]
-    public int Id { get; init; }
+    [Key] public int Id { get; init; }
 
-    [StringLength(191)]
-    public required string Name { get; set; }
+    [StringLength(191)] public required string Name { get; set; }
 
-    [StringLength(191)]
-    public string? Description { get; set; }
+    [StringLength(191)] public string? Description { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
-
-    public DateTime? DeletedAt { get; set; }
 }

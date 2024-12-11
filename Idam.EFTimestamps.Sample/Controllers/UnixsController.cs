@@ -27,10 +27,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     {
         var unix = await context.Unixs.FindAsync(id);
 
-        if (unix is null)
-        {
-            return NotFound();
-        }
+        if (unix is null) return NotFound();
 
         return unix;
     }
@@ -43,10 +40,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PutUnix(int id, UnixUpdateDto unixDto)
     {
-        if (id != unixDto.Id)
-        {
-            return BadRequest();
-        }
+        if (id != unixDto.Id) return BadRequest();
 
         context.Entry(unixDto).State = EntityState.Modified;
 
@@ -56,14 +50,9 @@ public class UnixsController(MyDbContext context) : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!UnixExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
+            if (!UnixExists(id)) return NotFound();
+
+            throw;
         }
 
         return NoContent();
@@ -92,10 +81,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
         var unix = await context.Unixs.IgnoreQueryFilters()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
-        if (unix is null || unix.DeletedAt is not null && permanent.Equals(false))
-        {
-            return NotFound();
-        }
+        if (unix is null || (unix.DeletedAt is not null && permanent.Equals(false))) return NotFound();
 
         context.Unixs.Remove(unix);
         await context.SaveChangesAsync();
@@ -112,10 +98,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
         var unix = await context.Unixs.IgnoreQueryFilters()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
-        if (unix is null)
-        {
-            return NotFound();
-        }
+        if (unix is null) return NotFound();
 
         context.Unixs.ForceRemove(unix);
         await context.SaveChangesAsync();
@@ -143,10 +126,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
 
-        if (unix is null)
-        {
-            return NotFound();
-        }
+        if (unix is null) return NotFound();
 
         return unix;
     }
@@ -161,10 +141,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
 
-        if (entity is null)
-        {
-            return NotFound();
-        }
+        if (entity is null) return NotFound();
 
         context.Unixs.Restore(entity);
         await context.SaveChangesAsync();
@@ -172,5 +149,8 @@ public class UnixsController(MyDbContext context) : ControllerBase
         return NoContent();
     }
 
-    private bool UnixExists(int id) => (context.Unixs?.Any(e => e.Id == id)).GetValueOrDefault();
+    private bool UnixExists(int id)
+    {
+        return context.Unixs.Any(e => e.Id == id);
+    }
 }

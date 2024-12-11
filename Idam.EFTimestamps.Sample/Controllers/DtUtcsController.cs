@@ -152,6 +152,6 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
 
     private bool DtUtcExists(int id)
     {
-        return (context.DtUtcs?.Any(e => e.Id == id)).GetValueOrDefault();
+        return context.DtUtcs.Any(e => e.Id == id);
     }
 }

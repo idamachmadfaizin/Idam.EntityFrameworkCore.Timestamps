@@ -9,7 +9,10 @@ namespace Idam.EFTimestamps.Sample.Controllers;
 public class ExceptionHandlerController : ControllerBase
 {
     [Route("HandleError")]
-    public IActionResult HandleError() => Problem();
+    public IActionResult HandleError()
+    {
+        return Problem();
+    }
 
     [Route("HandleErrorDevelopment")]
     public IActionResult HandleErrorDevelopment([FromServices] IHostEnvironment hostEnvironment)
@@ -21,7 +24,7 @@ public class ExceptionHandlerController : ControllerBase
             HttpContext.Features.Get<IExceptionHandlerFeature>()!;
 
         return Problem(
-            detail: exceptionHandlerFeature.Error.StackTrace,
+            exceptionHandlerFeature.Error.StackTrace,
             title: exceptionHandlerFeature.Error.Message);
     }
 }
