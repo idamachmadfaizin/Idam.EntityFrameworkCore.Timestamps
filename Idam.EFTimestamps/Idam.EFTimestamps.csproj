@@ -1,45 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Authors>Idamachmadfaizin</Authors>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Softdelete;Timestamps</PackageTags>
-		<PackageReleaseNotes>- Update to .net 8.
-- Update Microsoft.EntityFrameworkCore to 8.0.6.
-- Removed TimeStampsAttribute (use ColumnAttribute instead).
-- Removed IGuidEntity.</PackageReleaseNotes>
-		<PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</RepositoryUrl>
-		<Description>A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.</Description>
-		<Version>8.0.0</Version>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Authors>Idamachmadfaizin</Authors>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>Softdelete;Timestamps</PackageTags>
+        <PackageReleaseNotes>- Update to .net 8.
+            - Update Microsoft.EntityFrameworkCore to 8.0.6.
+            - Removed TimeStampsAttribute (use ColumnAttribute instead).
+            - Removed IGuidEntity.
+        </PackageReleaseNotes>
+        <PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</RepositoryUrl>
+        <Description>A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.</Description>
+        <Version>8.0.0</Version>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <WarningLevel>7</WarningLevel>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <WarningLevel>7</WarningLevel>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <WarningLevel>7</WarningLevel>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <WarningLevel>7</WarningLevel>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <None Include="..\LICENSE">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="..\LICENSE">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Include="..\README.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11"/>
+    </ItemGroup>
 
 </Project>
