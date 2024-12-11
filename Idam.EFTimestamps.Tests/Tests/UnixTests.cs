@@ -2,43 +2,44 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EFTimestamps.Tests.Tests;
+
 public class UnixTests : BaseTest
 {
     [Fact]
     public async Task Should_Set_CreatedAt_And_UpdatedAt_When_UnixCreate()
     {
-        var data = await AddAsync(_unixFaker.Generate());
+        var data = await AddAsync(UnixFaker.Generate());
 
         Assert.NotEqual(0, data.Id);
-        Assert.NotEqual(_unixMinValue, data.CreatedAt);
-        Assert.NotEqual(_unixMinValue, data.UpdatedAt);
+        Assert.NotEqual(UnixMinValue, data.CreatedAt);
+        Assert.NotEqual(UnixMinValue, data.UpdatedAt);
     }
 
     [Fact]
     public async Task Should_Update_UpdatedAt_When_UnixUpdate()
     {
-        var data = await AddAsync(_unixFaker.Generate());
+        var data = await AddAsync(UnixFaker.Generate());
 
         var oldUpdatedAt = data.UpdatedAt;
 
-        data.Name = _unixFaker.Generate().Name;
+        data.Name = UnixFaker.Generate().Name;
 
-        _context.Update(data);
+        Context.Update(data);
         await Task.Delay(1);
-        var updated = await _context.SaveChangesAsync();
+        var updated = await Context.SaveChangesAsync();
 
         Assert.True(updated > 0);
-        Assert.NotEqual(_unixMinValue, data.UpdatedAt);
+        Assert.NotEqual(UnixMinValue, data.UpdatedAt);
         Assert.NotEqual(oldUpdatedAt, data.UpdatedAt);
     }
 
     [Fact]
     public async Task Should_Set_DeletedAt_When_UnixDelete()
     {
-        var data = await AddAsync(_unixFaker.Generate());
+        var data = await AddAsync(UnixFaker.Generate());
         data = await DeleteAsync(data);
 
-        var dataFromDb = await _context.Unixs
+        var dataFromDb = await Context.Unixs
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
@@ -50,22 +51,22 @@ public class UnixTests : BaseTest
     [Fact]
     public async Task Should_Filtered_Not_Null_DeletedAt_From_List()
     {
-        var datas = await AddRangeAsync(_unixFaker.GenerateLazy(2).ToList());
+        var datas = await AddRangeAsync(UnixFaker.GenerateLazy(2).ToList());
 
         await DeleteAsync(datas.First());
 
-        var countUndeleteds = datas.Where(x => !x.DeletedAt.HasValue).Count();
+        var countUndeleteds = datas.Count(x => !x.DeletedAt.HasValue);
 
-        Assert.True(datas.Count() > countUndeleteds);
+        Assert.True(datas.Count > countUndeleteds);
     }
 
     [Fact]
     public async Task Should_Restore_Deleted_Unixs()
     {
-        var data = await AddAsync(_unixFaker.Generate());
+        var data = await AddAsync(UnixFaker.Generate());
         data = await DeleteAsync(data);
 
-        var dataFromDb = await _context.Unixs
+        var dataFromDb = await Context.Unixs
             .IgnoreQueryFilters()
             .Where(w => w.Id == data.Id)
             .Where(w => w.DeletedAt.HasValue)
@@ -74,10 +75,10 @@ public class UnixTests : BaseTest
         Assert.NotNull(dataFromDb);
         Assert.NotNull(dataFromDb.DeletedAt);
 
-        _context.Unixs.Restore(dataFromDb);
-        await _context.SaveChangesAsync();
+        Context.Unixs.Restore(dataFromDb);
+        await Context.SaveChangesAsync();
 
-        dataFromDb = await _context.Unixs
+        dataFromDb = await Context.Unixs
             .FirstOrDefaultAsync(x => x.Id == dataFromDb.Id);
 
         Assert.NotNull(dataFromDb);
@@ -88,11 +89,11 @@ public class UnixTests : BaseTest
     [Fact]
     public async Task Should_Permanent_Delete_Unixs()
     {
-        var data = await AddAsync(_unixFaker.Generate());
+        var data = await AddAsync(UnixFaker.Generate());
         data = await DeleteAsync(data);
         data = await DeleteAsync(data);
 
-        var dataFromDb = await _context.Unixs
+        var dataFromDb = await Context.Unixs
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
