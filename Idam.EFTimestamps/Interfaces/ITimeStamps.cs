@@ -1,28 +1,18 @@
 ﻿namespace Idam.EFTimestamps.Interfaces;
 
-/// <summary>
-/// Timestamps local interface.
-/// </summary>
-public interface ITimeStamps
-{
-    DateTime CreatedAt { get; set; }
-    DateTime UpdatedAt { get; set; }
-}
+public interface ITimeStampBase;
 
 /// <summary>
-/// Timestamps UTC interface.
+///     Timestamps local interface.
 /// </summary>
-public interface ITimeStampsUtc
-{
-    DateTime CreatedAt { get; set; }
-    DateTime UpdatedAt { get; set; }
-}
+public interface ITimeStamps : ICreatedAt, IUpdatedAt;
 
 /// <summary>
-/// Timestamps interface using Unix format
+///     Timestamps UTC interface.
 /// </summary>
-public interface ITimeStampsUnix
-{
-    long CreatedAt { get; set; }
-    long UpdatedAt { get; set; }
-}
+public interface ITimeStampsUtc : ICreatedAtUtc, IUpdatedAtUtc;
+
+/// <summary>
+///     Timestamps interface using Unix format
+/// </summary>
+public interface ITimeStampsUnix : ICreatedAtUnix, IUpdatedAtUnix;

@@ -1,30 +1,27 @@
-﻿using Idam.EFTimestamps.Interfaces;
+﻿using System.Linq.Expressions;
+using Idam.EFTimestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using System.Linq.Expressions;
 
 namespace Idam.EFTimestamps.Extensions;
 
 /// <summary>
-/// DbContext extension class.
+///     DbContext extension class.
 /// </summary>
 public static class DbContextExtensions
 {
     /// <summary>
-    /// Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+    ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
     /// </summary>
     /// <param name="changeTracker">The change tracker.</param>
     public static void AddTimestamps(this ChangeTracker changeTracker)
     {
-        foreach (var entityEntry in changeTracker.Entries())
-        {
-            entityEntry.AddTimestamps();
-        }
+        foreach (var entityEntry in changeTracker.Entries()) entityEntry.AddTimestamps();
     }
 
     /// <summary>
-    /// Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+    ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
     /// </summary>
     /// <param name="entityEntry">The entity entry.</param>
     private static void AddTimestamps(this EntityEntry? entityEntry)
@@ -54,70 +51,90 @@ public static class DbContextExtensions
                         softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         break;
                 }
-                break;
-            default:
+
                 break;
         }
     }
 
     /// <summary>
-    /// Updates the time stamps.
+    ///     Updates the time stamps.
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <param name="entityState">State of the entity.</param>
     private static void UpdateTimeStamps(object entity, EntityState entityState)
     {
         if (entityState is not EntityState.Added and not EntityState.Modified) return;
+        if (entity is not ITimeStampBase) return;
+
+        var now = DateTime.Now;
+        var nowUtc = DateTime.UtcNow;
+        var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         switch (entity)
         {
             case ITimeStamps timeStamps:
-                var now = DateTime.Now;
                 timeStamps.UpdatedAt = now;
-                if (entityState == EntityState.Added)
-                {
-                    timeStamps.CreatedAt = now;
-                }
+                if (entityState == EntityState.Added) timeStamps.CreatedAt = now;
+
                 break;
-            
+
             case ITimeStampsUtc timeStampsUtc:
-                var nowUtc = DateTime.UtcNow;
                 timeStampsUtc.UpdatedAt = nowUtc;
-                if (entityState == EntityState.Added)
-                {
-                    timeStampsUtc.CreatedAt = nowUtc;
-                }
+                if (entityState == EntityState.Added) timeStampsUtc.CreatedAt = nowUtc;
+
                 break;
 
             case ITimeStampsUnix timeStampsUnix:
-                var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 timeStampsUnix.UpdatedAt = nowUnix;
-                if (entityState == EntityState.Added)
-                {
-                    timeStampsUnix.CreatedAt = nowUnix;
-                }
+                if (entityState == EntityState.Added) timeStampsUnix.CreatedAt = nowUnix;
+
                 break;
+
             default:
+                if (entityState == EntityState.Added)
+                    switch (entity)
+                    {
+                        case ICreatedAt createdAt:
+                            createdAt.CreatedAt = now;
+                            break;
+                        case ICreatedAtUtc createdAtUtc:
+                            createdAtUtc.CreatedAt = nowUtc;
+                            break;
+                        case ICreatedAtUnix createdAtUnix:
+                            createdAtUnix.CreatedAt = nowUnix;
+                            break;
+                    }
+
+                switch (entity)
+                {
+                    case IUpdatedAt updatedAt:
+                        updatedAt.UpdatedAt = now;
+                        break;
+                    case IUpdatedAtUtc updatedAtUtc:
+                        updatedAtUtc.UpdatedAt = nowUtc;
+                        break;
+                    case IUpdatedAtUnix updatedAtUnix:
+                        updatedAtUnix.UpdatedAt = nowUnix;
+                        break;
+                }
+
                 break;
         }
     }
 
     /// <summary>
-    /// Query Filter to get model where DeletedAt field is null.
+    ///     Query Filter to get model where DeletedAt field is null.
     /// </summary>
     /// <param name="builder">The builder.</param>
     public static void AddSoftDeleteFilter(this ModelBuilder builder)
     {
         var mutableEntityTypes = builder.Model.GetEntityTypes();
 
-        foreach (var mutableEntityType in mutableEntityTypes)
-        {
-            builder.AddSoftDeleteFilter(mutableEntityType);
-        }
+        foreach (var mutableEntityType in mutableEntityTypes) builder.AddSoftDeleteFilter(mutableEntityType);
     }
 
     /// <summary>
-    /// Query Filter to get model where DeletedAt field is null.
+    ///     Query Filter to get model where DeletedAt field is null.
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="mutable">The mutable entity type.</param>
