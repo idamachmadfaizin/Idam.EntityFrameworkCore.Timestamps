@@ -4,9 +4,9 @@ namespace Idam.EFTimestamps.Sample.Models.Dto;
 
 public class DtUpdateDto
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    [StringLength(191)] public required string Name { get; set; }
+    [StringLength(191)] public required string Name { get; init; }
 
-    [StringLength(191)] public string? Description { get; set; }
+    [StringLength(191)] public string? Description { get; init; }
 }
