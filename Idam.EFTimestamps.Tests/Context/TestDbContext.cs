@@ -14,15 +14,15 @@ public class TestDbContext : DbContext
     {
     }
 
-    public DbSet<Dt> Dts { get; set; }
-    public DbSet<DtUtc> DtUtcs { get; set; }
-    public DbSet<Unix> Unixs { get; set; }
-    public DbSet<CreatedAtEntity> CreatedAts { get; set; }
-    public DbSet<CreatedAtUnixEntity> CreatedAtUnixs { get; set; }
-    public DbSet<CreatedAtUtcEntity> CreatedAtUtcs { get; set; }
-    public DbSet<UpdatedAtEntity> UpdatedAts { get; set; }
-    public DbSet<UpdatedAtUnixEntity> UpdatedAtUnixs { get; set; }
-    public DbSet<UpdatedAtUtcEntity> UpdatedAtUtcs { get; set; }
+    public DbSet<Dt> Dts { get; init; }
+    public DbSet<DtUtc> DtUtcs { get; init; }
+    public DbSet<Unix> Unixs { get; init; }
+    public DbSet<CreatedAtEntity> CreatedAts { get; init; }
+    public DbSet<CreatedAtUnixEntity> CreatedAtUnixs { get; init; }
+    public DbSet<CreatedAtUtcEntity> CreatedAtUtcs { get; init; }
+    public DbSet<UpdatedAtEntity> UpdatedAts { get; init; }
+    public DbSet<UpdatedAtUnixEntity> UpdatedAtUnixs { get; init; }
+    public DbSet<UpdatedAtUtcEntity> UpdatedAtUtcs { get; init; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

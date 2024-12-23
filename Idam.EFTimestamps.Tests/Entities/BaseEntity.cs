@@ -18,9 +18,9 @@ public abstract class BaseEntity
         Name = name;
     }
 
-    [Key] public int Id { get; set; }
+    [Key] public int Id { get; init; }
 
     [StringLength(191)] public required string Name { get; set; }
 
-    [StringLength(191)] public string? Description { get; set; }
+    [StringLength(191)] public string? Description { get; init; }
 }
