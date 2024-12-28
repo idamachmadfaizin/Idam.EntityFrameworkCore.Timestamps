@@ -2,44 +2,46 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Idam.EFTimestamps.svg)](https://www.nuget.org/packages/Idam.EFTimestamps) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EFTimestamps/actions/workflows/test.yml)
 
-A library for handling Timestamps and SoftDelete as UTC DateTime or Unix in EntityFramework.
+A lightweight .NET library that simplifies timestamp management in Entity Framework Core by automatically handling creation, update, and deletion timestamps. The library supports multiple timestamp formats including DateTime, UTC DateTime, and Unix Time Milliseconds.
 
-## Give a Star! :star:
+## :star: Support
 
-If you like or are using this project please give it a star. Thanks!
+If you find this library helpful, please consider giving it a star! Your support helps make it better.
 
-## Features
+## :rocket: Features
 
-- Soft delete (DeletedAt).
-- Timestamps (CreatedAt, UpdatedAt).
+- Automatic management of entity timestamps (Created, Updated, Deleted).
+- Multiple timestamp format support:
+  - DateTime.
+  - UTC DateTime.
+  - Unix Time Milliseconds ([learn more](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds)).
+- Built-in soft delete functionality.
+- Seamless integration with existing EF Core projects.
+- Customizable timestamp field names.
+- Individual timestamp interfaces for flexibility.
 
-> Both features support UTC DateTime
-> and [Unix Time Milliseconds](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds)
-> format.
->
->Example of Unix Time Milliseconds: [currentmillis.com](https://currentmillis.com)
+## :: Installation
 
-## Get started
-
-Run this command to install
-
-```sh
+Using Package Manager Console:
+```shell
 Install-Package Idam.EFTimestamps
 ```
 
-or
-
-```sh
+Using .NET CLI
+```shell
 dotnet add package Idam.EFTimestamps
 ```
 
 ## Usage
 
-### Using Timestamps
+### Basic Setup
 
-1. Add `AddTimestamps()` in your context.
+1. Configure bContext
 
-    ```cs
+   Add `AddTimestamps()` in your DbContext.
+
+    ```csharp
+    ...
     using Idam.EFTimestamps.Extensions;
 
     public class MyDbContext : DbContext
@@ -60,64 +62,51 @@ dotnet add package Idam.EFTimestamps
     }
     ```
 
-2. Implement an Interface (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`) to your entity.
+2. Define your entity 
 
-    ```cs
+   Choose the appropriate interface based on your timestamp format needs (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`).
+
+    ```csharp
     using Idam.EFTimestamps.Interfaces;
-
-    /// BaseEntity
-    public abstract class BaseEntity
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = default!;
-        public string? Description { get; set; }
-    }
     
-    /// Using local DateTime Format
-    public class Dt : BaseEntity, ITimeStamps
+    /// Local DateTime
+    public class Product : ITimeStamps
     {
+        ...
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
-    /// Using UTC DateTime Format
-    public class DtUtc : BaseEntity, ITimeStampsUtc
+    /// UTC DateTime
+    public class Product : ITimeStampsUtc
     {
+        ...
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
-    /// Using Unix Format
-    public class Unix : ITimeStampsUnix
+    /// Unix Time
+    public class Product : ITimeStampsUnix
     {
+        ...
         public long CreatedAt { get; set; }
         public long UpdatedAt { get; set; }
     }
     ```
 
-### Using SoftDelete
+### Soft Delete Feature
 
-1. Add `AddTimestamps()` and `AddSoftDeleteFilter()` in your context.
+#### Setup
 
-    ```cs
+1. Update your DbContext 
+
+   Add `AddSoftDeleteFilter()` in your context.
+
+    ```csharp
     using Idam.EFTimestamps.Extensions;
 
     public class MyDbContext : DbContext
     {
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
-            ChangeTracker.AddTimestamps();
-
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
-
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-        {
-            ChangeTracker.AddTimestamps();
-
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.AddSoftDeleteFilter();
@@ -127,128 +116,92 @@ dotnet add package Idam.EFTimestamps
     }
     ```
 
-2. Implement an Interface (`ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`) to your entity.
+2. Implement soft delete in your entities
 
-    ```cs
+   Choose the appropriate interface based on your timestamp format needs (`ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`).
+
+    ```csharp
     using Idam.EFTimestamps.Interfaces;
 
-    /// Using local DateTime Format
-    public class Dt : BaseEntity, ISoftDelete
+    /// Local DateTime
+    public class Product : ISoftDelete
     {
+        ...
         public DateTime? DeletedAt { get; set; }
     }
     
-    /// Using UTC DateTime Format
-    public class Dt : BaseEntity, ISoftDeleteUtc
+    /// UTC DateTime
+    public class Product : ISoftDeleteUtc
     {
+        ...
         public DateTime? DeletedAt { get; set; }
     }
 
-    /// Using Unix Format
-    public class Unix : BaseEntity, ISoftDeleteUnix
+    /// Unix Time
+    public class Product : ISoftDeleteUnix
     {
+        ...
         public long? DeletedAt { get; set; }
     }
     ```
 
-#### Restore
+#### Soft Delete Operations
 
-The SoftDelete has a `Restore()` function, so you can restore the deleted data.
+```csharp
+// Restore a soft-deleted item
+_context.Products.Restore(product);
+await context.SaveChangesAsync();
 
-```cs
-using Idam.EFTimestamps.Extensions;
+// Permanently delete an item
+_context.Products.ForceRemove(product);
+await context.SaveChangesAsync();
 
-/// Your context
-public class MyDbContext : DbContext
+// Check if item is deleted
+bool isDeleted = product.Trashed();
+
+// Query including soft-deleted items
+var deletedProducts = await _context.Products
+    .IgnoreQueryFilters()
+    .Where(x => x.DeletedAt != null)
+    .ToListAsync();
+```
+
+### :art: Customization
+
+#### Custom Field Names
+
+```csharp
+public class Product : ITimeStamps, ISoftDelete
 {
-    public DbSet<Dt> Dts { get; set; }
-}
-
-/// Dt Controller
-public class DtController
-{
-    readonly MyDbContext _context;
-
-    public async Task<IActionResult> RestoreAsync(Dt dt)
-    {
-        var restored = _context.Dts.Restore(dt);
-        await context.SaveChangesAsync();
-        
-        return Ok(restored);
-    }
+    [Column("AddedAt")]
+    public DateTime CreatedAt { get; set; }
+    
+    [Column("ModifiedAt")]
+    public DateTime UpdatedAt { get; set; }
+    
+    [Column("RemovedAt")]
+    public DateTime? DeletedAt { get; set; }
 }
 ```
 
-#### Force Remove
+#### Individual Timestamp Interfaces
 
-The SoftDelete has a `ForceRemove()` function, so you can permanently remove the data.
+```csharp
+public class Product : ICreatedAt { }      // Only creation time
+public class Product : ICreatedAtUtc { }   // Only creation time (UTC)
+public class Product : ICreatedAtUnix { }  // Only creation time (Unix time)
 
-```cs
-/// Dt Controller
-public class DtController
-{
-    readonly MyDbContext _context;
+public class Product : IUpdatedAt { }      // Only update time
+public class Product : IUpdatedAtUtc { }   // Only update time (UTC)
+public class Product : IUpdatedAtUnix { }  // Only update time (Unix time)
 
-    public async Task<IActionResult> ForceRemoveAsync(Dt dt)
-    {
-        _context.Dts.ForceRemove(dt);
-        await context.SaveChangesAsync();
-        
-        return Ok();
-    }
-}
+public class Product : ISoftDelete { }     // Only soft delete
+public class Product : ISoftDeleteUtc { }  // Only soft delete (UTC)
+public class Product : ISoftDeleteUnix { } // Only soft delete (Unix time)
 ```
 
-#### Trashed
+## :arrows_counterclockwise: Migration Guide
 
-The SoftDelete has a `Trashed()` function to check if current data is deleted.
-
-```cs
-/// Dt Controller
-public class DtController
-{
-    public IActionResult IsDeleted(Dt dt)
-    {
-        bool isDeleted = dt.Trashed();
-        
-        return Ok(isDeleted);
-    }
-}
-```
-
-> The `Trashed()` function only shows when your entity implements an interface `ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`.
-
-#### Ignore global soft delete filter
-
-By default the deleted data filtered from the query, if you want to get the deleted data you can ignore the global
-soft delete filter by using `IgnoreQueryFilters()`.
-
-```cs
-/// Dt Controller
-public class DtController
-{
-    readonly MyDbContext _context;
-
-    public async Task<IActionResult> GetAllDeletedAsync()
-    {
-        var deleteds = await _context.Dts
-            .IgnoreQueryFilters()
-            .Where(x => x.DeletedAt != null)
-            .ToListAsync();
-
-        return Ok(deleteds);
-    }
-}
-```
-
-### Using Custom TimeStamps fields
-
-By default, the TimeStamps interface uses CreatedAt, UpdatedAt, and DeletedAt as field names. To customize the
-TimeStamps fields simplify just add ColumnAttribute to the fields.
-
-## Migrating
-
-Migrating from 8.0.0
-
-1. Rename the ITimeStamps to ITimeStampsUtc.
-2. Rename the ISoftDelete to ISoftDeleteUtc.
+When upgrading from version 8.0.0:
+- Replace ITimeStamps with ITimeStampsUtc. 
+- Replace ISoftDelete with ISoftDeleteUtc.
