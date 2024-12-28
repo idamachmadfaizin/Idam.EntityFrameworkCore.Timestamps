@@ -20,7 +20,7 @@ If you find this library helpful, please consider giving it a star! Your support
 - Customizable timestamp field names.
 - Individual timestamp interfaces for flexibility.
 
-## :: Installation
+## Installation
 
 Using Package Manager Console:
 ```shell
