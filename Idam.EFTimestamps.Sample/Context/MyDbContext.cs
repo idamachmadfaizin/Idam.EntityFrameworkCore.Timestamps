@@ -9,6 +9,7 @@ public class MyDbContext(DbContextOptions options, IConfiguration configuration)
     public DbSet<Unix> Unixs { get; init; }
     public DbSet<Dt> Dts { get; init; }
     public DbSet<DtUtc> DtUtcs { get; init; }
+    public DbSet<DtCustom> DtCustoms { get; init; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
