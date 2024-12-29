@@ -20,7 +20,7 @@ If you find this library helpful, please consider giving it a star! Your support
 - Customizable timestamp field names.
 - Individual timestamp interfaces for flexibility.
 
-## Installation
+## :package: Installation
 
 Using Package Manager Console:
 ```shell
@@ -32,71 +32,69 @@ Using .NET CLI
 dotnet add package Idam.EFTimestamps
 ```
 
-## Usage
+## :wrench: Basic Setup
 
-### Basic Setup
+### 1. Configure DbContext
 
-1. Configure bContext
+Add `AddTimestamps()` in your DbContext.
 
-   Add `AddTimestamps()` in your DbContext.
+```csharp
+...
+using Idam.EFTimestamps.Extensions;
 
-    ```csharp
+public class MyDbContext : DbContext
+{
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ChangeTracker.AddTimestamps();
+
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ChangeTracker.AddTimestamps();
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+}
+```
+
+### 2. Define your entity 
+
+Choose the appropriate interface based on your timestamp format needs (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`).
+
+```csharp
+using Idam.EFTimestamps.Interfaces;
+
+/// Local DateTime
+public class Product : ITimeStamps
+{
     ...
-    using Idam.EFTimestamps.Extensions;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
 
-    public class MyDbContext : DbContext
-    {
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
-            ChangeTracker.AddTimestamps();
+/// UTC DateTime
+public class Product : ITimeStampsUtc
+{
+    ...
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
 
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
+/// Unix Time
+public class Product : ITimeStampsUnix
+{
+    ...
+    public long CreatedAt { get; set; }
+    public long UpdatedAt { get; set; }
+}
+```
 
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-        {
-            ChangeTracker.AddTimestamps();
+## Soft Delete Feature
 
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-    }
-    ```
-
-2. Define your entity 
-
-   Choose the appropriate interface based on your timestamp format needs (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`).
-
-    ```csharp
-    using Idam.EFTimestamps.Interfaces;
-    
-    /// Local DateTime
-    public class Product : ITimeStamps
-    {
-        ...
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-    }
-
-    /// UTC DateTime
-    public class Product : ITimeStampsUtc
-    {
-        ...
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-    }
-
-    /// Unix Time
-    public class Product : ITimeStampsUnix
-    {
-        ...
-        public long CreatedAt { get; set; }
-        public long UpdatedAt { get; set; }
-    }
-    ```
-
-### Soft Delete Feature
-
-#### Setup
+### Setup
 
 1. Update your DbContext 
 
@@ -145,7 +143,7 @@ dotnet add package Idam.EFTimestamps
     }
     ```
 
-#### Soft Delete Operations
+### Soft Delete Operations
 
 ```csharp
 // Restore a soft-deleted item
@@ -166,9 +164,9 @@ var deletedProducts = await _context.Products
     .ToListAsync();
 ```
 
-### :art: Customization
+## :art: Customization
 
-#### Custom Field Names
+### Custom Field Names
 
 ```csharp
 public class Product : ITimeStamps, ISoftDelete
@@ -184,7 +182,7 @@ public class Product : ITimeStamps, ISoftDelete
 }
 ```
 
-#### Individual Timestamp Interfaces
+### Individual Timestamp Interfaces
 
 ```csharp
 public class Product : ICreatedAt { }      // Only creation time
