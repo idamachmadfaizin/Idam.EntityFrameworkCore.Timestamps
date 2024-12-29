@@ -92,7 +92,7 @@ public class Product : ITimeStampsUnix
 }
 ```
 
-## Soft Delete Feature
+## :wastebasket: Soft Delete Feature
 
 ### Setup
 
