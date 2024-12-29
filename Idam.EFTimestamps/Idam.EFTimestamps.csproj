@@ -7,11 +7,11 @@
         <Authors>Idamachmadfaizin</Authors>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>Softdelete;Timestamps</PackageTags>
-        <PackageReleaseNotes>- Add UTC format.</PackageReleaseNotes>
+        <PackageReleaseNotes>Add net9 target framework.</PackageReleaseNotes>
         <PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</PackageProjectUrl>
         <RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EFTimestamps</RepositoryUrl>
         <Description>A lightweight .NET timestamps with formats including DateTime, UTC DateTime, and Unix Time Milliseconds.</Description>
-        <Version>8.1.0</Version>
+        <Version>8.1.1</Version>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     </PropertyGroup>
