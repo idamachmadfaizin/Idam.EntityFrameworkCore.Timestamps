@@ -7,7 +7,7 @@ on:
       - 6-create-gh-action-to-publish-to-nugetcom
 
 env:
-  dotnetVersion: 8.x.x
+  dotnetVersion: 9.x.x
   testProjectPath: Idam.EFTimestamps.Tests
   srcProjectPath: Idam.EFTimestamps
 

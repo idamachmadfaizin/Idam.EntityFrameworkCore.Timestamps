@@ -2,7 +2,7 @@ name: Test NuGet Package
 on: [push]
 
 env:
-  dotnetVersion: 8.x.x
+  dotnetVersion: 9.x.x
   testProjectPath: Idam.EFTimestamps.Tests
   srcProjectPath: Idam.EFTimestamps
 
