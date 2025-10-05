@@ -1,8 +1,9 @@
-# Idam.EFTimestamps
+# Idam.EntityFrameworkCore.Timestamps
 
-[![NuGet](https://img.shields.io/nuget/v/Idam.EFTimestamps.svg)](https://www.nuget.org/packages/Idam.EFTimestamps) [![.NET](https://github.com/ronnygunawan/RG.RazorMail/actions/workflows/CI.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EFTimestamps/actions/workflows/test.yml)
+[![NuGet](https://img.shields.io/nuget/v/Idam.EntityFrameworkCore.Timestamps.svg)](https://www.nuget.org/packages/Idam.EntityFrameworkCore.Timestamps)
+[![Build Status](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions/workflows/test.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions/workflows/test.yml)
 
-A lightweight .NET library that simplifies timestamp management in Entity Framework Core by automatically handling creation, update, and deletion timestamps. The library supports multiple timestamp formats including DateTime, UTC DateTime, and Unix Time Milliseconds.
+A .NET library for entity timestamps and softdelete. Easily manage CreatedAt, UpdatedAt, and DeletedAt fields with support for DateTime, UTC DateTime, and Unix time (milliseconds).
 
 ## :star: Support
 
@@ -10,37 +11,32 @@ If you find this library helpful, please consider giving it a star! Your support
 
 ## :rocket: Features
 
-- Automatic management of entity timestamps (Created, Updated, Deleted).
-- Multiple timestamp format support:
-  - DateTime.
-  - UTC DateTime.
-  - Unix Time Milliseconds ([learn more](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds)).
-- Built-in soft delete functionality.
-- Seamless integration with existing EF Core projects.
-- Customizable timestamp field names.
-- Individual timestamp interfaces for flexibility.
+- Automatic handling of entity timestamps (**CreatedAt**, **UpdatedAt**, **DeletedAt**).
+- Built-in **soft delete** functionality with global query filters.
+- Support for multiple timestamp formats:
+  - Local `DateTime`
+  - `UTC DateTime`.
+  - `Unix Time (milliseconds)` ([learn more](https://currentmillis.com)) ([docs](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.tounixtimemilliseconds)).
+- Seamless integration with existing **EF Core**.
+- Customizable field names with `[Column]` attribute.
+- Flexible interfaces for individual timestamp requirements.
 
 ## :package: Installation
 
-Using Package Manager Console:
+.NET CLI
 ```shell
-Install-Package Idam.EFTimestamps
-```
-
-Using .NET CLI
-```shell
-dotnet add package Idam.EFTimestamps
+dotnet add package Idam.EntityFrameworkCore.Timestamps
 ```
 
 ## :wrench: Basic Setup
 
-### 1. Configure DbContext
+### 1. Configure `DbContext`
 
-Add `AddTimestamps()` in your DbContext.
+Call `AddTimestamps()` in your `DbContext` before saving changes.
 
 ```csharp
 ...
-using Idam.EFTimestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 
 public class MyDbContext : DbContext
 {
@@ -60,12 +56,12 @@ public class MyDbContext : DbContext
 }
 ```
 
-### 2. Define your entity 
+### 2. Define Your Entity 
 
-Choose the appropriate interface based on your timestamp format needs (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`).
+Implement the appropriate timestamps interface (`ITimeStamps` or `ITimeStampsUtc` or `ITimeStampsUnix`).
 
 ```csharp
-using Idam.EFTimestamps.Interfaces;
+using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 
 /// Local DateTime
 public class Product : ITimeStamps
@@ -92,16 +88,14 @@ public class Product : ITimeStampsUnix
 }
 ```
 
-## :wastebasket: Soft Delete Feature
+## :wastebasket: Soft Delete
 
 ### Setup
 
-1. Update your DbContext 
-
-   Add `AddSoftDeleteFilter()` in your context.
+1. Call `AddSoftDeleteFilter()` in your `DbContext`.
 
     ```csharp
-    using Idam.EFTimestamps.Extensions;
+    using Idam.EntityFrameworkCore.Timestamps.Extensions;
 
     public class MyDbContext : DbContext
     {
@@ -114,12 +108,10 @@ public class Product : ITimeStampsUnix
     }
     ```
 
-2. Implement soft delete in your entities
-
-   Choose the appropriate interface based on your timestamp format needs (`ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`).
+2. Implement the appropriate soft delete interface (`ISoftDelete` or `ISoftDeleteUtc` or `ISoftDeleteUnix`).
 
     ```csharp
-    using Idam.EFTimestamps.Interfaces;
+    using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 
     /// Local DateTime
     public class Product : ISoftDelete
@@ -143,7 +135,7 @@ public class Product : ITimeStampsUnix
     }
     ```
 
-### Soft Delete Operations
+### Operations
 
 ```csharp
 // Restore a soft-deleted item
@@ -182,24 +174,21 @@ public class Product : ITimeStamps, ISoftDelete
 }
 ```
 
-### Individual Timestamp Interfaces
+### Individual Interfaces
 
 ```csharp
-public class Product : ICreatedAt { }      // Only creation time
-public class Product : ICreatedAtUtc { }   // Only creation time (UTC)
-public class Product : ICreatedAtUnix { }  // Only creation time (Unix time)
+public class Product : ICreatedAt { }
+public class Product : ICreatedAtUtc { }
+public class Product : ICreatedAtUnix { }
 
-public class Product : IUpdatedAt { }      // Only update time
-public class Product : IUpdatedAtUtc { }   // Only update time (UTC)
-public class Product : IUpdatedAtUnix { }  // Only update time (Unix time)
+public class Product : IUpdatedAt { }
+public class Product : IUpdatedAtUtc { }
+public class Product : IUpdatedAtUnix { }
 
-public class Product : ISoftDelete { }     // Only soft delete
-public class Product : ISoftDeleteUtc { }  // Only soft delete (UTC)
-public class Product : ISoftDeleteUnix { } // Only soft delete (Unix time)
+public class Product : ISoftDelete { }
+public class Product : ISoftDeleteUtc { }
+public class Product : ISoftDeleteUnix { }
 ```
 
 ## :arrows_counterclockwise: Migration Guide
 
-When upgrading from version 8.0.0:
-- Replace ITimeStamps with ITimeStampsUtc. 
-- Replace ISoftDelete with ISoftDeleteUtc.

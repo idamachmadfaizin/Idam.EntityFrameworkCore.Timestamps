@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSource>true</IncludeSource>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+        
+        <PackageId>Idam.EntityFrameworkCore.Timestamps</PackageId>
+        <Version>8.0.0-alpha1</Version>
+        <Authors>Idam Achmad Faizin</Authors>
+        <Copyright>Copyright © Idam Achmad Faizin 2025</Copyright>
+        
+        <Description>A .NET library for entity timestamps and softdelete. Easily manage CreatedAt, UpdatedAt, and DeletedAt fields with support for DateTime, UTC DateTime, and Unix time (milliseconds).</Description>
+        <PackageTags>Timestamps;Softdelete;CreatedAt;UpdatedAt;DeletedAt</PackageTags>
+        <PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageReleaseNotes>Initial release with CreatedAt, UpdatedAt, and DeletedAt support.</PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.20" />
+    </ItemGroup>
+
+</Project>

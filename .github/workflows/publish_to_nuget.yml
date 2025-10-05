@@ -1,4 +1,4 @@
-name: Publish NuGet Package
+name: Publish
 on:
   push:
     tags:
@@ -8,8 +8,8 @@ on:
 
 env:
   dotnetVersion: 9.x.x
-  testProjectPath: Idam.EFTimestamps.Tests
-  srcProjectPath: Idam.EFTimestamps
+  testProjectPath: Idam.EntityFrameworkCore.Timestamps.Tests
+  srcProjectPath: Idam.EntityFrameworkCore.Timestamps
 
 jobs:
   test:
@@ -18,26 +18,26 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Setup Cache dependencies
+      - name: Cache .NET Dependencies
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           # Look to see if there is a cache hit for the corresponding requirements file
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-nuget
+            ${{ runner.os }}-nuget-
 
-      - name: Restore dependencies 
+      - name: Restore `${{ env.testProjectPath }}` Dependencies
         run: dotnet restore ${{ env.testProjectPath }}
 
-      - name: Build library
+      - name: Build `${{ env.testProjectPath }}`
         run: dotnet build ${{ env.testProjectPath }} --configuration Release --no-restore
 
       - name: Test
@@ -52,32 +52,29 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Setup Cache dependencies
+      - name: Cache .NET Dependencies
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           # Look to see if there is a cache hit for the corresponding requirements file
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-nuget
+            ${{ runner.os }}-nuget-
 
-      - name: Restore dependencies
+      - name: Restore `${{ env.srcProjectPath }}` Dependencies
         run: dotnet restore ${{ env.srcProjectPath }}
 
-      - name: Build library
+      - name: Build `${{ env.srcProjectPath }}`
         run: dotnet build ${{ env.srcProjectPath }} --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test ${{ env.srcProjectPath }} --no-restore --verbosity normal
-
-      - name: Pack NuGet package
+      - name: Pack package
         run: dotnet pack ${{ env.srcProjectPath }} --configuration Release
 
       - name: Echo package output
