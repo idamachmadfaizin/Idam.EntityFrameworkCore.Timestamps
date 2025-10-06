@@ -9,10 +9,9 @@
         <IncludeSource>true</IncludeSource>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
         
         <PackageId>Idam.EntityFrameworkCore.Timestamps</PackageId>
-        <Version>8.0.0-alpha2</Version>
+        <Version>8.0.0-alpha3</Version>
         <Authors>Idam Achmad Faizin</Authors>
         <Copyright>Copyright © Idam Achmad Faizin 2025</Copyright>
         
