@@ -74,11 +74,8 @@ jobs:
       - name: Build `${{ env.srcProjectPath }}`
         run: dotnet build ${{ env.srcProjectPath }} --configuration Release --no-restore
 
-      - name: Pack package
-        run: dotnet pack ${{ env.srcProjectPath }} --configuration Release
-
       - name: Echo package output
         run: ls ${{ github.workspace }}/${{ env.srcProjectPath }}/bin/Release
 
       - name: Publish to NuGet.org
-        run: dotnet nuget push ${{ env.srcProjectPath }}/bin/Release/*.symbols.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ${{ env.srcProjectPath }}/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
