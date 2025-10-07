@@ -12,7 +12,7 @@
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         
         <PackageId>Idam.EntityFrameworkCore.Timestamps</PackageId>
-        <Version>8.0.0-alpha4</Version>
+        <Version>8.0.0-alpha5</Version>
         <Authors>Idam Achmad Faizin</Authors>
         <Copyright>Copyright © Idam Achmad Faizin 2025</Copyright>
         
