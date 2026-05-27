@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
 
-public abstract class BaseTest
+public abstract class BaseTest : IDisposable
 {
     protected readonly TestDbContext Context;
 
@@ -31,7 +31,6 @@ public abstract class BaseTest
         Context = new TestDbContext();
         Context.Database.EnsureCreated();
 
-        DtFaker = new BaseEntityFaker<Dt>();
         CreatedAtFaker = new BaseEntityFaker<CreatedAtEntity>();
         CreatedAtUnixFaker = new BaseEntityFaker<CreatedAtUnixEntity>();
         CreatedAtUtcFaker = new BaseEntityFaker<CreatedAtUtcEntity>();
@@ -44,6 +43,13 @@ public abstract class BaseTest
 
         UtcMinValue = DateTime.MinValue.ToUniversalTime();
         UnixMinValue = DateTime.MinValue.ToUniversalTime().ToUnixTimeMilliseconds();
+    }
+
+    public void Dispose()
+    {
+        Context.Database.EnsureDeleted();
+        Context.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -102,5 +108,3 @@ public abstract class BaseTest
         return data;
     }
 }
-
-//TODO: Create a tests for new entities.
