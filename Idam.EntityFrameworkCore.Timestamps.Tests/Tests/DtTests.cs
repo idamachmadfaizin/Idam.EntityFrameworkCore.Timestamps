@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
@@ -55,9 +55,60 @@ public class DtTests : BaseTest
 
         await DeleteAsync(datas.First());
 
-        var countUndeleteds = datas.Count(x => !x.DeletedAt.HasValue);
+        var activeDatas = await Context.Dts.ToListAsync();
+        var deletedDatas = await Context.Dts
+            .IgnoreQueryFilters()
+            .WhereTrashed()
+            .ToListAsync();
 
-        Assert.True(datas.Count > countUndeleteds);
+        Assert.Single(activeDatas);
+        Assert.Single(deletedDatas);
+    }
+
+    [Fact]
+    public async Task Should_Query_Active_And_Deleted_With_Query_Helpers()
+    {
+        var datas = await AddRangeAsync(DtFaker.GenerateLazy(2).ToList());
+
+        await Context.Dts.SoftDeleteAsync(datas.First());
+
+        var activeCount = await Context.Dts
+            .IgnoreQueryFilters()
+            .WhereActive()
+            .CountAsync();
+
+        var deletedCount = await Context.Dts
+            .IgnoreQueryFilters()
+            .WhereTrashed()
+            .CountAsync();
+
+        Assert.Equal(1, activeCount);
+        Assert.Equal(1, deletedCount);
+    }
+
+    [Fact]
+    public async Task Should_SoftDelete_And_Restore_With_Async_Helpers()
+    {
+        var data = await AddAsync(DtFaker.Generate());
+
+        var softDeleted = await Context.Dts.SoftDeleteAsync(data);
+        Assert.True(softDeleted > 0);
+
+        var deletedData = await Context.Dts
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.Id == data.Id);
+
+        Assert.NotNull(deletedData);
+        Assert.NotNull(deletedData.DeletedAt);
+
+        var restored = await Context.Dts.RestoreAsync(deletedData);
+        Assert.True(restored > 0);
+
+        var restoredData = await Context.Dts
+            .FirstOrDefaultAsync(x => x.Id == data.Id);
+
+        Assert.NotNull(restoredData);
+        Assert.Null(restoredData.DeletedAt);
     }
 
     [Fact]

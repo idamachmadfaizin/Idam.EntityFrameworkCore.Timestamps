@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
@@ -55,9 +55,14 @@ public class UnixTests : BaseTest
 
         await DeleteAsync(datas.First());
 
-        var countUndeleteds = datas.Count(x => !x.DeletedAt.HasValue);
+        var activeDatas = await Context.Unixs.ToListAsync();
+        var deletedDatas = await Context.Unixs
+            .IgnoreQueryFilters()
+            .WhereTrashed()
+            .ToListAsync();
 
-        Assert.True(datas.Count > countUndeleteds);
+        Assert.Single(activeDatas);
+        Assert.Single(deletedDatas);
     }
 
     [Fact]

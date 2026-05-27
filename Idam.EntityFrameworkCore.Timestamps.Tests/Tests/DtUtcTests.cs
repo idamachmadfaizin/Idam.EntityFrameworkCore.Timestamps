@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Ekstensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,9 +60,14 @@ public class DtUtcTests : BaseTest
 
         await DeleteAsync(datas.First());
 
-        var countUndelete = datas.Count(x => !x.DeletedAt.HasValue);
+        var activeDatas = await Context.DtUtcs.ToListAsync();
+        var deletedDatas = await Context.DtUtcs
+            .IgnoreQueryFilters()
+            .WhereTrashed()
+            .ToListAsync();
 
-        Assert.True(datas.Length > countUndelete);
+        Assert.Single(activeDatas);
+        Assert.Single(deletedDatas);
     }
 
     [Fact]
