@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Context;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Models.Dto;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Models.Entity;
@@ -63,7 +63,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     // POST: api/DtCustoms
     // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    [ProducesResponseType<Dt>(StatusCodes.Status201Created)]
+    [ProducesResponseType<DtCustom>(StatusCodes.Status201Created)]
     public async Task<ActionResult<DtCustom>> PostDtCustom(DtCustomCreatedDto dtCustomDto)
     {
         var dt = new DtCustom(dtCustomDto);
