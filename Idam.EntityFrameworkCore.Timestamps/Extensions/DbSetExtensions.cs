@@ -49,6 +49,7 @@ public static class DbSetExtensions
         {
             ArgumentNullException.ThrowIfNull(dbSet);
             ArgumentNullException.ThrowIfNull(entity);
+            ArgumentNullException.ThrowIfNull(entity);
 
             switch (entity)
             {
