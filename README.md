@@ -1,7 +1,7 @@
 # Idam.EntityFrameworkCore.Timestamps
 
 [![NuGet](https://img.shields.io/nuget/v/Idam.EntityFrameworkCore.Timestamps.svg)](https://www.nuget.org/packages/Idam.EntityFrameworkCore.Timestamps)
-[![Build Status](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions/workflows/test.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions/workflows/test.yml)
+[![Build Status](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions/workflows/test.yml/badge.svg)](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/actions)
 
 A .NET library for entity timestamps and softdelete. Easily manage CreatedAt, UpdatedAt, and DeletedAt fields with support for DateTime, UTC DateTime, and Unix time (milliseconds).
 
@@ -192,3 +192,62 @@ public class Product : ISoftDeleteUnix { }
 
 ## :arrows_counterclockwise: Migration Guide
 
+## :handshake: How to Contribute
+
+We welcome contributions from the community! Here's how you can help make this project better:
+
+### Getting Started
+
+1. **Fork the Repository**: Click the "Fork" button at the top right of this repository.
+2. **Clone Your Fork**: 
+   ```shell
+   git clone https://github.com/your-username/Idam.EntityFrameworkCore.Timestamps.git
+   cd Idam.EntityFrameworkCore.Timestamps
+   ```
+3. **Create a Branch**: Create a feature branch for your changes:
+   ```shell
+   git checkout -b feature/your-feature-name
+   ```
+
+### Making Changes
+
+1. **Make Your Changes**: Implement your feature or bug fix.
+2. **Write Tests**: Add or update tests to cover your changes.
+3. **Follow Code Style**: Ensure your code follows the project's existing code style and conventions.
+4. **Commit Your Changes**: Write clear, concise commit messages:
+   ```shell
+   git commit -m "Add: brief description of your changes"
+   ```
+
+### Submitting Your Contribution
+
+1. **Push to Your Fork**:
+   ```shell
+   git push origin feature/your-feature-name
+   ```
+2. **Open a Pull Request**: 
+   - Go to the original repository and click "New Pull Request"
+   - Select your branch and provide a clear description of your changes
+   - Reference any related issues using `#issue-number`
+
+### Guidelines
+
+- **Code Quality**: Ensure your code is clean and well-documented
+- **Testing**: All tests must pass before submission
+- **Documentation**: Update README.md or other docs if your changes introduce new features
+- **Issues**: Check existing issues before starting work to avoid duplicates
+- **Communication**: Be respectful and constructive in discussions
+
+### Reporting Issues
+
+Found a bug or have a feature request? Please [open an issue](https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps/issues) with:
+- A clear title and description
+- Steps to reproduce (for bugs)
+- Expected vs. actual behavior
+- Your environment details (.NET version, EF Core version, etc.)
+
+### Questions?
+
+If you have any questions, feel free to open a discussion or reach out to the maintainers.
+
+Thank you for your contributions! :tada:
