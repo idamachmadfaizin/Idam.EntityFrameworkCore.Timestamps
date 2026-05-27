@@ -10,7 +10,7 @@
         <DeterministicSourcePaths>true</DeterministicSourcePaths>
 
         <PackageId>Idam.EntityFrameworkCore.Timestamps</PackageId>
-        <Version>8.0.0-alpha5</Version>
+        <Version>10.0.0-alpha1</Version>
         <Authors>Idam Achmad Faizin</Authors>
         <Copyright>Copyright © Idam Achmad Faizin 2025</Copyright>
 
