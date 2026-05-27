@@ -6,7 +6,8 @@
         <IncludeSource>true</IncludeSource>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <Deterministic>true</Deterministic>
+        <DeterministicSourcePaths>true</DeterministicSourcePaths>
 
         <PackageId>Idam.EntityFrameworkCore.Timestamps</PackageId>
         <Version>8.0.0-alpha5</Version>
