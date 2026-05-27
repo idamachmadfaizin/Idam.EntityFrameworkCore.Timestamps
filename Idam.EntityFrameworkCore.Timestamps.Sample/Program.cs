@@ -1,5 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Sample.Context;
-using Microsoft.EntityFrameworkCore;
+using Idam.EntityFrameworkCore.Timestamps.Sample.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 if (!builder.Environment.IsProduction()) builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<MyDbContext>(options => { options.UseSqlite("SampleDatabase"); });
+builder.Services.AddDbContext<MyDbContext>();
 
 var app = builder.Build();
 
@@ -24,12 +23,6 @@ else
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseExceptionHandler("/api/ExceptionHandler/HandleErrorDevelopment");
-}
-
-if (!app.Environment.IsProduction())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
