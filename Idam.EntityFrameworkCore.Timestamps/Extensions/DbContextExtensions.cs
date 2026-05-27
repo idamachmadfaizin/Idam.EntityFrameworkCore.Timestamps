@@ -11,39 +11,84 @@ namespace Idam.EntityFrameworkCore.Timestamps.Extensions;
 /// </summary>
 public static class DbContextExtensions
 {
-    /// <summary>
-    ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
-    /// </summary>
-    /// <param name="changeTracker">The change tracker.</param>
-    public static void AddTimestamps(this ChangeTracker changeTracker)
+    extension(ChangeTracker changeTracker)
     {
-        foreach (var entityEntry in changeTracker.Entries()) entityEntry.AddTimestamps();
-    }
-
-    /// <summary>
-    ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
-    /// </summary>
-    /// <param name="entityEntry">The entity entry.</param>
-    private static void AddTimestamps(this EntityEntry? entityEntry)
-    {
-        if (entityEntry is null) return;
-
-        switch (entityEntry.State)
+        /// <summary>
+        ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+        /// </summary>
+        public void AddTimestamps()
         {
-            case EntityState.Added:
-            case EntityState.Modified:
-                UpdateTimeStamps(entityEntry);
-                break;
-
-            case EntityState.Deleted:
-                UpdateSoftDelete(entityEntry);
-                break;
-            case EntityState.Detached:
-            case EntityState.Unchanged:
-            default:
-                break;
+            foreach (var entityEntry in changeTracker.Entries()) entityEntry.AddTimestamps();
         }
     }
+
+    extension(EntityEntry? entityEntry)
+    {
+        /// <summary>
+        ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+        /// </summary>
+        private void AddTimestamps()
+        {
+            if (entityEntry is null) return;
+
+            switch (entityEntry.State)
+            {
+                case EntityState.Added:
+                case EntityState.Modified:
+                    UpdateTimeStamps(entityEntry);
+                    break;
+
+                case EntityState.Deleted:
+                    UpdateSoftDelete(entityEntry);
+                    break;
+                case EntityState.Detached:
+                case EntityState.Unchanged:
+                default:
+                    break;
+            }
+        }
+    }
+
+    /// <param name="builder">The builder.</param>
+    extension(ModelBuilder builder)
+    {
+        /// <summary>
+        ///     Query Filter to get model where DeletedAt field is null.
+        /// </summary>
+        public void AddSoftDeleteFilter()
+        {
+            var mutableEntityTypes = builder.Model.GetEntityTypes();
+
+            foreach (var mutableEntityType in mutableEntityTypes) builder.AddSoftDeleteFilter(mutableEntityType);
+        }
+
+        /// <summary>
+        ///     Query Filter to get model where DeletedAt field is null.
+        /// </summary>
+        /// <param name="mutable">The mutable entity type.</param>
+        private void AddSoftDeleteFilter(IMutableEntityType? mutable)
+        {
+            if (mutable is null) return;
+
+            if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
+                !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
+                !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
+
+            var propertyType = typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType)
+                ? typeof(DateTime?)
+                : typeof(long?);
+
+            var parameter = Expression.Parameter(mutable.ClrType, "e");
+
+            var property = Expression.Property(parameter, nameof(ISoftDelete.DeletedAt));
+            var body = Expression.Equal(property, Expression.Constant(null, propertyType));
+
+            var expression = Expression.Lambda(body, parameter);
+
+            builder.Entity(mutable.ClrType).HasQueryFilter(expression);
+        }
+    }
+
 
     /// <summary>
     ///     Updates the time stamps.
@@ -120,7 +165,7 @@ public static class DbContextExtensions
     {
         if (entityEntry.State is not EntityState.Deleted) return;
         if (entityEntry.Entity is not ISoftDeleteBase) return;
-        
+
         switch (entityEntry.Entity)
         {
             case ISoftDelete { DeletedAt: null } softDelete:
@@ -136,43 +181,5 @@ public static class DbContextExtensions
                 softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 break;
         }
-    }
-
-    /// <summary>
-    ///     Query Filter to get model where DeletedAt field is null.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    public static void AddSoftDeleteFilter(this ModelBuilder builder)
-    {
-        var mutableEntityTypes = builder.Model.GetEntityTypes();
-
-        foreach (var mutableEntityType in mutableEntityTypes) builder.AddSoftDeleteFilter(mutableEntityType);
-    }
-
-    /// <summary>
-    ///     Query Filter to get model where DeletedAt field is null.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <param name="mutable">The mutable entity type.</param>
-    private static void AddSoftDeleteFilter(this ModelBuilder builder, IMutableEntityType? mutable)
-    {
-        if (mutable is null) return;
-
-        if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
-            !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
-            !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
-
-        var propertyType = typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType)
-            ? typeof(DateTime?)
-            : typeof(long?);
-
-        var parameter = Expression.Parameter(mutable.ClrType, "e");
-
-        var property = Expression.Property(parameter, nameof(ISoftDelete.DeletedAt));
-        var body = Expression.Equal(property, Expression.Constant(null, propertyType));
-
-        var expression = Expression.Lambda(body, parameter);
-
-        builder.Entity(mutable.ClrType).HasQueryFilter(expression);
     }
 }
