@@ -63,8 +63,8 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     // POST: api/DtUtcs
     // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    [ProducesResponseType<Dt>(StatusCodes.Status201Created)]
-    public async Task<ActionResult<Dt>> PostDtUtc(DtUtcCreateDto dtUtcDto)
+    [ProducesResponseType<DtUtc>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<DtUtc>> PostDtUtc(DtUtcCreateDto dtUtcDto)
     {
         var dtUtc = new DtUtc(dtUtcDto);
 

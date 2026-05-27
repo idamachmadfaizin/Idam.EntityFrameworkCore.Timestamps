@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Context;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Models.Dto;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Models.Entity;
@@ -42,7 +42,9 @@ public class UnixsController(MyDbContext context) : ControllerBase
     {
         if (id != unixDto.Id) return BadRequest();
 
-        context.Entry(unixDto).State = EntityState.Modified;
+        var unix = new Unix(unixDto);
+
+        context.Entry(unix).State = EntityState.Modified;
 
         try
         {
