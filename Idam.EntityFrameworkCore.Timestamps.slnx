@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Idam.EntityFrameworkCore.Timestamps.Sample/Idam.EntityFrameworkCore.Timestamps.Sample.csproj" />
+  <Project Path="Idam.EntityFrameworkCore.Timestamps.Tests/Idam.EntityFrameworkCore.Timestamps.Tests.csproj" />
+  <Project Path="Idam.EntityFrameworkCore.Timestamps/Idam.EntityFrameworkCore.Timestamps.csproj" />
+</Solution>

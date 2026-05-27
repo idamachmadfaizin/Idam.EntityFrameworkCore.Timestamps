@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Idam.Libs.EF.Sample": {
+    "Https": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
