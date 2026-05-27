@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
+using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,11 +6,13 @@ namespace Idam.EntityFrameworkCore.Timestamps.Tests.Context;
 
 public class TestDbContext : DbContext
 {
-    public TestDbContext()
+    public TestDbContext() : this(new DbContextOptionsBuilder<TestDbContext>()
+        .UseInMemoryDatabase($"Idam.Libs.EF.Tests.{Guid.NewGuid():N}")
+        .Options)
     {
     }
 
-    public TestDbContext(DbContextOptions options) : base(options)
+    public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
     {
     }
 
@@ -23,11 +25,6 @@ public class TestDbContext : DbContext
     public DbSet<UpdatedAtEntity> UpdatedAts { get; init; }
     public DbSet<UpdatedAtUnixEntity> UpdatedAtUnixs { get; init; }
     public DbSet<UpdatedAtUtcEntity> UpdatedAtUtcs { get; init; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseInMemoryDatabase("Idam.Libs.EF.Tests");
-    }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {

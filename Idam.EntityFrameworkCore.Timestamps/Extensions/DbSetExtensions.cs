@@ -1,4 +1,4 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Interfaces;
+using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -19,6 +19,7 @@ public static class DbSetExtensions
         public TEntity Restore(TEntity entity)
         {
             ArgumentNullException.ThrowIfNull(dbSet);
+            ArgumentNullException.ThrowIfNull(entity);
 
             switch (entity)
             {
@@ -45,6 +46,7 @@ public static class DbSetExtensions
         public EntityEntry<TEntity> ForceRemove(TEntity entity)
         {
             ArgumentNullException.ThrowIfNull(dbSet);
+            ArgumentNullException.ThrowIfNull(entity);
 
             switch (entity)
             {
