@@ -80,7 +80,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDtUtc(int id)
     {
-        var dtUtc = await context.DtUtcs.IgnoreQueryFilters()
+        var dtUtc = await context.DtUtcs.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dtUtc is null) return NotFound();
@@ -97,7 +97,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ForceDeleteDtUtc(int id)
     {
-        var dtUtc = await context.DtUtcs.IgnoreQueryFilters()
+        var dtUtc = await context.DtUtcs.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dtUtc is null) return NotFound();
@@ -113,7 +113,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<DtUtc>>> GetDeletedDtUtcs()
     {
         return await context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.DeletedAt != null)
             .ToListAsync();
     }
@@ -123,7 +123,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<DtUtc>> GetDeletedDtUtc(int id)
     {
         var dtUtc = await context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
@@ -138,7 +138,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreDtUtc(int id)
     {
         var entity = await context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();

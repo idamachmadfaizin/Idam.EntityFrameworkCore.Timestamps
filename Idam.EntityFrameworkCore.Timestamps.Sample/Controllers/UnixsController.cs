@@ -80,7 +80,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUnix(int id, [FromQuery] bool permanent = false)
     {
-        var unix = await context.Unixs.IgnoreQueryFilters()
+        var unix = await context.Unixs.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (unix is null || (unix.DeletedAt is not null && permanent.Equals(false))) return NotFound();
@@ -97,7 +97,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ForceDeleteDt(int id)
     {
-        var unix = await context.Unixs.IgnoreQueryFilters()
+        var unix = await context.Unixs.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (unix is null) return NotFound();
@@ -113,7 +113,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<Unix>>> GetDeletedUnixs()
     {
         return await context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.DeletedAt != null)
             .ToListAsync();
     }
@@ -123,7 +123,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<Unix>> GetDeletedUnix(int id)
     {
         var unix = await context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
@@ -138,7 +138,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreUnix(int id)
     {
         var entity = await context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();

@@ -80,7 +80,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDtCustom(int id)
     {
-        var dt = await context.DtCustoms.IgnoreQueryFilters()
+        var dt = await context.DtCustoms.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dt is null) return NotFound();
@@ -97,7 +97,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ForceDeleteDtCustom(int id)
     {
-        var dt = await context.DtCustoms.IgnoreQueryFilters()
+        var dt = await context.DtCustoms.IncludeTrashed()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dt is null) return NotFound();
@@ -113,7 +113,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<DtCustom>>> GetDeletedDtCustoms()
     {
         return await context.DtCustoms
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.DeletedAt != null)
             .ToListAsync();
     }
@@ -123,7 +123,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<DtCustom>> GetDeletedDtCustom(int id)
     {
         var dt = await context.DtCustoms
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
@@ -138,7 +138,7 @@ public class DtCustomsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreDtCustom(int id)
     {
         var entity = await context.DtCustoms
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();

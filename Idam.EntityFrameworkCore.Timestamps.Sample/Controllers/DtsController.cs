@@ -80,7 +80,7 @@ public class DtsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDt(int id)
     {
-        var dt = await context.Dts.IgnoreQueryFilters()
+        var dt = await context.Dts.IgnoreSoftDeleteFilter()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dt is null) return NotFound();
@@ -97,7 +97,7 @@ public class DtsController(MyDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ForceDeleteDt(int id)
     {
-        var dt = await context.Dts.IgnoreQueryFilters()
+        var dt = await context.Dts.IgnoreSoftDeleteFilter()
             .FirstOrDefaultAsync(b => b.Id.Equals(id));
 
         if (dt is null) return NotFound();
@@ -113,7 +113,7 @@ public class DtsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<Dt>>> GetDeletedDts()
     {
         return await context.Dts
-            .IgnoreQueryFilters()
+            .IgnoreSoftDeleteFilter()
             .Where(w => w.DeletedAt != null)
             .ToListAsync();
     }
@@ -123,7 +123,7 @@ public class DtsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<Dt>> GetDeletedDt(int id)
     {
         var foo = await context.Dts
-            .IgnoreQueryFilters()
+            .IgnoreSoftDeleteFilter()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
@@ -138,7 +138,7 @@ public class DtsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreDt(int id)
     {
         var entity = await context.Dts
-            .IgnoreQueryFilters()
+            .IgnoreSoftDeleteFilter()
             .Where(w => w.Id == id)
             .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
