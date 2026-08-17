@@ -44,7 +44,7 @@ public class DtUtcTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
         Assert.NotNull(dataFromDb);
@@ -72,7 +72,7 @@ public class DtUtcTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == data.Id)
             .Where(w => w.DeletedAt.HasValue)
             .FirstOrDefaultAsync();
@@ -99,7 +99,7 @@ public class DtUtcTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.DtUtcs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
         Assert.Null(dataFromDb);

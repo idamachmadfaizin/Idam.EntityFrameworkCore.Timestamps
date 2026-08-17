@@ -40,7 +40,7 @@ public class UnixTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
         Assert.NotNull(dataFromDb);
@@ -67,7 +67,7 @@ public class UnixTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .Where(w => w.Id == data.Id)
             .Where(w => w.DeletedAt.HasValue)
             .FirstOrDefaultAsync();
@@ -94,7 +94,7 @@ public class UnixTests : BaseTest
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.Unixs
-            .IgnoreQueryFilters()
+            .IncludeTrashed()
             .FirstOrDefaultAsync(x => x.Id == data.Id);
 
         Assert.Null(dataFromDb);
