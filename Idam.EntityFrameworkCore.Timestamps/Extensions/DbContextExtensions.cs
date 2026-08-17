@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Idam.EntityFrameworkCore.Timestamps.Constants;
 using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -85,7 +86,7 @@ public static class DbContextExtensions
 
             var expression = Expression.Lambda(body, parameter);
 
-            builder.Entity(mutable.ClrType).HasQueryFilter(expression);
+            builder.Entity(mutable.ClrType).HasQueryFilter(SoftDeleteFilters.Default, expression);
         }
     }
 
