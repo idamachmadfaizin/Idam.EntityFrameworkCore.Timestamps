@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using Idam.EntityFrameworkCore.Timestamps.Constants;
+﻿using Idam.EntityFrameworkCore.Timestamps.Constants;
 using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.Linq.Expressions;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Extensions;
 
