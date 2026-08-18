@@ -51,7 +51,6 @@ Central Package Management enabled. All NuGet versions are in `Directory.Package
 - File-scoped namespaces
 - Nullable enabled, ImplicitUsings enabled
 - C# 14 extension blocks (not traditional extension methods)
-- No `.editorconfig` or analyzer config
 
 ## Key Architecture
 
