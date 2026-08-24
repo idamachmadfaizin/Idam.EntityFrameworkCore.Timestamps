@@ -16,6 +16,12 @@ public class TestDbContext : DbContext
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddTimeStampsInterceptor();
+        base.OnConfiguring(optionsBuilder);
+    }
+
     public DbSet<Dt> Dts { get; init; }
     public DbSet<DtUtc> DtUtcs { get; init; }
     public DbSet<Unix> Unixs { get; init; }
@@ -28,14 +34,14 @@ public class TestDbContext : DbContext
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        ChangeTracker.AddTimestamps();
+        // ChangeTracker.AddTimestamps();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = default)
     {
-        ChangeTracker.AddTimestamps();
+        // ChangeTracker.AddTimestamps();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
