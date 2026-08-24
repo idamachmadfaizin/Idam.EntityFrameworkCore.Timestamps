@@ -1,7 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Idam.EntityFrameworkCore.Timestamps.Sample.Models.Dto;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Sample.Models.Entity;
 

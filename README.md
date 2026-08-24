@@ -13,6 +13,7 @@ If you find this library helpful, please consider giving it a star! Your support
 
 - Automatic handling of entity timestamps (**CreatedAt**, **UpdatedAt**, **DeletedAt**).
 - Built-in **soft delete** functionality with global query filters.
+- **IQueryable extension methods** to easily query soft-deleted data (`IncludeTrashed()`, `OnlyTrashed()`).
 - Support for multiple timestamp formats:
   - Local `DateTime`
   - `UTC DateTime`.
@@ -149,12 +150,19 @@ await context.SaveChangesAsync();
 // Check if item is deleted
 bool isDeleted = product.Trashed();
 
-// Query including soft-deleted items
+// Query including soft-deleted items (using EF Core named query filters)
+var productsWithDeleted = await _context.Products
+    .IncludeTrashed()
+    .ToListAsync();
+
+// Query only soft-deleted items
 var deletedProducts = await _context.Products
-    .IgnoreQueryFilters()
-    .Where(x => x.DeletedAt != null)
+    .OnlyTrashed()
     .ToListAsync();
 ```
+
+> [!NOTE]
+> `IncludeTrashed()` leverages EF Core's named query filters feature to ignore only the default soft-delete global query filter, leaving other global query filters (like multi-tenancy) active.
 
 ## :art: Customization
 
