@@ -164,6 +164,21 @@ var deletedProducts = await _context.Products
 > [!NOTE]
 > `IncludeTrashed()` leverages EF Core's named query filters feature to ignore only the default soft-delete global query filter, leaving other global query filters (like multi-tenancy) active.
 
+> [!WARNING]
+> **Cascade delete bypasses soft delete.** By the time the timestamp logic runs, EF Core has already marked the dependents of a removed parent as `Deleted`. The parent is soft-deleted, but any dependent that does **not** implement a soft-delete interface is **permanently deleted** — leaving a soft-deleted parent pointing at rows that no longer exist.
+>
+> For relationships where the parent is soft-deleted, either make the dependents soft-deletable too, or switch the relationship to `DeleteBehavior.Restrict`:
+>
+> ```csharp
+> modelBuilder.Entity<Order>()
+>     .HasMany(o => o.Lines)
+>     .WithOne()
+>     .OnDelete(DeleteBehavior.Restrict);
+> ```
+
+> [!NOTE]
+> `ForceRemove()` stamps `DeletedAt` on the entity before removing it, which is how it tells the soft-delete logic to let the delete through. If `SaveChanges()` is never called or throws, that entity stays tracked with `DeletedAt` set, and the next `SaveChanges()` will soft-delete it. Discard the context after a failed force-remove.
+
 ## :art: Customization
 
 ### Custom Field Names

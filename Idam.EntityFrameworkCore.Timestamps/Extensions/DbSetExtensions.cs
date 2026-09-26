@@ -34,7 +34,9 @@ public static class DbSetExtensions
                     break;
             }
 
-            return entity;
+            // Update() attaches the entity when it is not tracked yet; without it a detached
+            // or no-tracking entity is cleared in memory only and SaveChanges() writes nothing.
+            return dbSet.Update(entity).Entity;
         }
 
         /// <summary>
