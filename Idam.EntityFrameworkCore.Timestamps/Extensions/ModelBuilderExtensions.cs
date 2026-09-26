@@ -29,6 +29,10 @@ public static class ModelBuilderExtensions
         {
             if (mutable is null) return;
 
+            // EF Core only allows a query filter on the root entity type of a hierarchy,
+            // and rejects it outright on owned types.
+            if (mutable.BaseType is not null || mutable.IsOwned()) return;
+
             if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
                 !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
                 !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;

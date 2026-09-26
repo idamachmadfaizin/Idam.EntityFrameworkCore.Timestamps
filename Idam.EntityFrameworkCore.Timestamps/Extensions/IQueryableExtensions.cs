@@ -27,7 +27,11 @@ public static class IQueryableExtensions
         /// </returns>
         public IQueryable<TEntity> OnlyTrashed()
         {
-            return query.IncludeTrashed().Where(x => x.Trashed());
+            return typeof(ISoftDeleteUnix).IsAssignableFrom(typeof(TEntity))
+                ? query.IncludeTrashed()
+                    .Where(x => EF.Property<long?>(x, nameof(ISoftDelete.DeletedAt)) != null)
+                : query.IncludeTrashed()
+                    .Where(x => EF.Property<DateTime?>(x, nameof(ISoftDelete.DeletedAt)) != null);
         }
     }
 }
