@@ -1,4 +1,5 @@
 ﻿using Idam.EntityFrameworkCore.Timestamps.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
 
@@ -9,8 +10,9 @@ namespace Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
 /// <seealso cref="ISoftDelete" />
 public class Dt : BaseEntity, ITimeStamps, ISoftDelete
 {
-    public DateTime? DeletedAt { get; set; }
-    public DateTime CreatedAt { get; set; }
+    [Precision(6)] public DateTime? DeletedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    [Precision(6)] public DateTime CreatedAt { get; set; }
+
+    [Precision(6)] public DateTime UpdatedAt { get; set; }
 }

@@ -35,14 +35,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore `${{ env.testProjectPath }}` Dependencies
-        run: dotnet restore ${{ env.testProjectPath }}
+      # The whole solution, so a compile error in the library or the sample fails here
+      # rather than at release time.
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Build `${{ env.testProjectPath }}`
-        run: dotnet build ${{ env.testProjectPath }} --configuration Release --no-restore
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
 
+      # Needs a Docker daemon for the SQL Server, PostgreSQL and MySQL containers.
+      # ubuntu-latest ships one; SQLite runs in-process.
       - name: Test
-        run: dotnet test ${{ env.testProjectPath }} --no-restore --verbosity normal
+        run: dotnet test ${{ env.testProjectPath }} --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.job }}
+          path: "**/TestResults/**/coverage.cobertura.xml"
+          if-no-files-found: warn
 
   publish:
     name: "Build, Pack, and Publish package to NuGet.org"
