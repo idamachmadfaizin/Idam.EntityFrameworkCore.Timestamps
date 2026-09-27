@@ -1,4 +1,4 @@
-﻿namespace Idam.EntityFrameworkCore.Timestamps.Tests.Ekstensions;
+﻿namespace Idam.EntityFrameworkCore.Timestamps.Tests.Extensions;
 
 internal static class DateTimeExtension
 {

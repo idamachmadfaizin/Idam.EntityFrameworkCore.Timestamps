@@ -37,14 +37,10 @@ public static class ModelBuilderExtensions
                 !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
                 !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
 
-            var propertyType = typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType)
-                ? typeof(DateTime?)
-                : typeof(long?);
-
             var parameter = Expression.Parameter(mutable.ClrType, "e");
 
             var property = Expression.Property(parameter, nameof(ISoftDelete.DeletedAt));
-            var body = Expression.Equal(property, Expression.Constant(null, propertyType));
+            var body = Expression.Equal(property, Expression.Constant(null, property.Type));
 
             var expression = Expression.Lambda(body, parameter);
 

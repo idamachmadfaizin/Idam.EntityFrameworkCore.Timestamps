@@ -113,8 +113,7 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<DtUtc>>> GetDeletedDtUtcs()
     {
         return await context.DtUtcs
-            .IncludeTrashed()
-            .Where(w => w.DeletedAt != null)
+            .OnlyTrashed()
             .ToListAsync();
     }
 
@@ -123,9 +122,8 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<DtUtc>> GetDeletedDtUtc(int id)
     {
         var dtUtc = await context.DtUtcs
-            .IncludeTrashed()
+            .OnlyTrashed()
             .Where(w => w.Id == id)
-            .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
 
         if (dtUtc is null) return NotFound();
@@ -138,9 +136,8 @@ public class DtUtcsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreDtUtc(int id)
     {
         var entity = await context.DtUtcs
-            .IncludeTrashed()
+            .OnlyTrashed()
             .Where(w => w.Id == id)
-            .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
         if (entity is null) return NotFound();
 

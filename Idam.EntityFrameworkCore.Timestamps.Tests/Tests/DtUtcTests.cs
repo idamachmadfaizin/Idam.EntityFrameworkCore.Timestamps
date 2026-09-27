@@ -1,5 +1,5 @@
 ﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
-using Idam.EntityFrameworkCore.Timestamps.Tests.Ekstensions;
+using Idam.EntityFrameworkCore.Timestamps.Tests.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 using Idam.EntityFrameworkCore.Timestamps.Tests.Entities;

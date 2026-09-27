@@ -11,7 +11,7 @@ If you find this library helpful, please consider giving it a star! Your support
 
 ## :rocket: Features
 
-- Automatic handling of entity timestamps (**CreatedAt**, **UpdatedAt**, **DeletedAt**).
+- Automatic handling of entity timestamps (**CreatedAt**, **UpdatedAt**, **DeletedAt**) via a **SaveChanges interceptor** — no base class, no overrides.
 - Built-in **soft delete** functionality with global query filters.
 - **IQueryable extension methods** to easily query soft-deleted data (`IncludeTrashed()`, `OnlyTrashed()`).
 - Support for multiple timestamp formats:
@@ -33,29 +33,55 @@ dotnet add package Idam.EntityFrameworkCore.Timestamps
 
 ### 1. Configure `DbContext`
 
-Call `AddTimestamps()` in your `DbContext` before saving changes.
+Register the interceptor. It covers both `SaveChanges` and `SaveChangesAsync`, so there is
+nothing to override.
 
 ```csharp
-...
 using Idam.EntityFrameworkCore.Timestamps.Extensions;
 
 public class MyDbContext : DbContext
 {
-    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        ChangeTracker.AddTimestamps();
-
-        return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
-
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-    {
-        ChangeTracker.AddTimestamps();
-
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        optionsBuilder.AddTimeStampsInterceptor();
     }
 }
 ```
+
+Or when the options are built outside the context:
+
+```csharp
+builder.Services.AddDbContext<MyDbContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+    options.AddTimeStampsInterceptor();
+});
+```
+
+<details>
+<summary>Without the interceptor</summary>
+
+`ChangeTracker.AddTimestamps()` does the same work and can be called directly. Use this only if
+you already override `SaveChanges` for other reasons — and do not combine it with the
+interceptor, or the timestamps are computed twice.
+
+```csharp
+public override int SaveChanges(bool acceptAllChangesOnSuccess)
+{
+    ChangeTracker.AddTimestamps();
+
+    return base.SaveChanges(acceptAllChangesOnSuccess);
+}
+
+public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+{
+    ChangeTracker.AddTimestamps();
+
+    return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+}
+```
+
+</details>
 
 ### 2. Define Your Entity 
 
@@ -244,6 +270,33 @@ public class Product : ISoftDeleteUnix { }
 ```
 
 ## :arrows_counterclockwise: Migration Guide
+
+### Moving to the interceptor
+
+Replace the two `SaveChanges` overrides with a single registration:
+
+```diff
+-public override int SaveChanges(bool acceptAllChangesOnSuccess)
+-{
+-    ChangeTracker.AddTimestamps();
+-    return base.SaveChanges(acceptAllChangesOnSuccess);
+-}
+-
+-public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+-{
+-    ChangeTracker.AddTimestamps();
+-    return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+-}
++protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
++{
++    optionsBuilder.AddTimeStampsInterceptor();
++}
+```
+
+Remove the overrides when you add the interceptor. Keeping both is harmless but computes every
+timestamp twice.
+
+`AddTimestamps()` remains public and supported; nothing breaks if you keep the overrides.
 
 ## :handshake: How to Contribute
 
