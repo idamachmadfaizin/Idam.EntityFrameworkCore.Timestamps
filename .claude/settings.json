@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet format:*)",
+      "Bash(dotnet list:*)",
+      "Bash(dotnet nuget why:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)"
+    ],
+    "deny": [
+      "Bash(dotnet nuget push:*)"
+    ]
+  }
+}
