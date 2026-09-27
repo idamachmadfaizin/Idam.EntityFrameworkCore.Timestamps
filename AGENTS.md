@@ -21,8 +21,14 @@ Uses `.slnx` solution format (not traditional `.sln`).
 ## Commands
 
 ```bash
-# Run all tests (CI mirrors this)
+# Run all tests, every provider (CI mirrors this). Needs a running Docker daemon.
 dotnet test Idam.EntityFrameworkCore.Timestamps.Tests
+
+# Fast loop, no container needed
+dotnet test Idam.EntityFrameworkCore.Timestamps.Tests --filter "Provider=Sqlite"
+
+# One provider at a time
+dotnet test Idam.EntityFrameworkCore.Timestamps.Tests --filter "Provider=PostgreSql"
 
 # Build with tests
 dotnet build Idam.EntityFrameworkCore.Timestamps.Tests --configuration Release
@@ -40,11 +46,41 @@ Central Package Management enabled. All NuGet versions are in `Directory.Package
 
 ## Testing
 
-- Framework: xUnit with `[Fact]` (no `[Theory]` usage observed)
-- Test data: `Bogus` library via `BaseEntityFaker<T>`
-- Database: EF Core InMemory provider, one unique DB per test (`Guid.NewGuid()` in name)
-- Test base class: `BaseTest` provides `AddAsync`, `AddRangeAsync`, `DeleteAsync` helpers; each test creates and destroys its own `TestDbContext`
+- Framework: xUnit with `[Fact]`
+- Test data: `Bogus`, via `BaseTest.Fake<T>()` / `FakeMany<T>(n)` (wrapping `BaseEntityFaker<T>`)
 - Global usings in `Usings.cs` — only `global using Xunit`
+
+### Provider matrix
+
+Every test runs against **SQLite, SQL Server, MySQL and PostgreSQL** — real relational providers
+only. SQL Server, MySQL and PostgreSQL run in containers via Testcontainers, so `dotnet test`
+needs a Docker daemon; SQLite runs in-process and needs nothing.
+
+The EF Core InMemory provider is deliberately **not** used. It is not relational: it evaluates
+LINQ client-side and has no column types, so it silently passes queries that no database can
+translate and timestamps that no column can store. It hid real bugs in this repo behind a green
+build. Do not add it back as a shortcut when a container feels slow — use
+`--filter "Provider=Sqlite"` instead.
+
+- `Tests/Fixtures/` holds one fixture per provider, each behind a `[CollectionDefinition]` so the
+  container starts once per run. Every test still gets its own database.
+- `BaseTest<TFixture>` takes the fixture and exposes `Context`, `AddAsync`, `AddRangeAsync`,
+  `DeleteAsync`, and `ReloadAsync<T>(id)` for asserting what the provider actually stored.
+- Each suite is an `abstract class XTests<TFixture> : BaseTest<TFixture>` plus one sealed subclass
+  per provider, tagged `[Trait("Provider", "...")]` and `[Collection(...)]`. Add a test to the
+  abstract class and it runs everywhere.
+
+### Provider quirks the tests work around
+
+- **PostgreSQL**: Npgsql maps `DateTime` to `timestamp with time zone` and rejects `Kind=Local`,
+  so the local-time interfaces need `timestamp without time zone`. See
+  `TestDbContext.MapLocalDateTimesForNpgsql`.
+- **MySQL**: `DATETIME` defaults to whole seconds, which would make two updates in the same second
+  indistinguishable. Test entities use `[Precision(6)]`. The container runs as `root` because the
+  module's default user may not `CREATE DATABASE`.
+- **MySQL provider**: Pomelo has no EF Core 10 release (latest is 9.0.0), so this repo uses
+  Oracle's `MySql.EntityFrameworkCore`.
+- **All providers**: `DateTimeKind` is never persisted; a UTC value returns as `Unspecified`.
 
 ## Code Style
 

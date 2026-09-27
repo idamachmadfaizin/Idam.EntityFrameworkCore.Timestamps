@@ -89,6 +89,36 @@ public class Product : ITimeStampsUnix
 }
 ```
 
+> [!WARNING]
+> **PostgreSQL rejects the local-time interfaces by default.** Npgsql maps `DateTime` to
+> `timestamp with time zone`, which accepts only UTC values, so `ITimeStamps`, `ICreatedAt`,
+> `IUpdatedAt` and `ISoftDelete` fail on write with:
+>
+> ```
+> Cannot write DateTime with Kind=Local to PostgreSQL type 'timestamp with time zone',
+> only UTC is supported.
+> ```
+>
+> On PostgreSQL, prefer the UTC interfaces (`ITimeStampsUtc`, `ISoftDeleteUtc`) or the Unix ones.
+> To keep local time anyway, pin the columns to the untimezoned type:
+>
+> ```csharp
+> modelBuilder.Entity<Product>().Property(p => p.CreatedAt).HasColumnType("timestamp without time zone");
+> ```
+
+> [!NOTE]
+> **`DateTimeKind` is not persisted by any provider.** An entity read back from the database
+> returns `CreatedAt.Kind == DateTimeKind.Unspecified`, even when it was written as UTC. Treat
+> the value as UTC based on the interface the entity implements, not on its `Kind`.
+
+> [!NOTE]
+> **MySQL `DATETIME` defaults to whole seconds**, so two updates within the same second produce
+> an identical `UpdatedAt`. Ask for sub-second precision where that matters:
+>
+> ```csharp
+> [Precision(6)] public DateTime UpdatedAt { get; set; }
+> ```
+
 ## :wastebasket: Soft Delete
 
 ### Setup

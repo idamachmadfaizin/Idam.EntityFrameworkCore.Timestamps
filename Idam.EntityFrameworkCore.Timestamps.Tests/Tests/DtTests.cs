@@ -1,14 +1,19 @@
 ﻿using Idam.EntityFrameworkCore.Timestamps.Extensions;
 using Microsoft.EntityFrameworkCore;
 
+using Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
+
+using Idam.EntityFrameworkCore.Timestamps.Tests.Fixtures;
+
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
 
-public class DtTests : BaseTest
+public abstract class DtTests<TFixture>(TFixture fixture) : BaseTest<TFixture>(fixture)
+    where TFixture : IDbFixture
 {
     [Fact]
     public async Task Should_Set_CreatedAt_And_UpdatedAt_When_DtCreate()
     {
-        var data = await AddAsync(DtFaker.Generate());
+        var data = await AddAsync(Fake<Dt>());
 
         Assert.NotEqual(0, data.Id);
         Assert.NotEqual(DateTime.MinValue, data.CreatedAt);
@@ -18,11 +23,11 @@ public class DtTests : BaseTest
     [Fact]
     public async Task Should_Update_UpdatedAt_When_DtUpdate()
     {
-        var data = await AddAsync(DtFaker.Generate());
+        var data = await AddAsync(Fake<Dt>());
 
         var oldUpdatedAt = data.UpdatedAt;
 
-        data.Name = DtFaker.Generate().Name;
+        data.Name = Fake<Dt>().Name;
 
         Context.Update(data);
         await Task.Delay(1);
@@ -36,7 +41,7 @@ public class DtTests : BaseTest
     [Fact]
     public async Task Should_Set_DeletedAt_When_DtDelete()
     {
-        var data = await AddAsync(DtFaker.Generate());
+        var data = await AddAsync(Fake<Dt>());
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.Dts
@@ -51,19 +56,21 @@ public class DtTests : BaseTest
     [Fact]
     public async Task Should_Filtered_Not_Null_DeletedAt_From_List()
     {
-        var datas = await AddRangeAsync(DtFaker.GenerateLazy(2).ToList());
+        var datas = await AddRangeAsync(FakeMany<Dt>(2));
+        var deleted = await DeleteAsync(datas.First());
 
-        await DeleteAsync(datas.First());
+        // Query the database: the previous version only counted the in-memory list, which
+        // could never fail and never exercised the global query filter.
+        var visible = await Context.Dts.ToListAsync();
 
-        var countUndeleteds = datas.Count(x => !x.DeletedAt.HasValue);
-
-        Assert.True(datas.Count > countUndeleteds);
+        Assert.Single(visible);
+        Assert.DoesNotContain(visible, x => x.Id == deleted.Id);
     }
 
     [Fact]
     public async Task Should_Restore_Deleted_Dts()
     {
-        var data = await AddAsync(DtFaker.Generate());
+        var data = await AddAsync(Fake<Dt>());
         data = await DeleteAsync(data);
 
         var dataFromDb = await Context.Dts
@@ -89,7 +96,7 @@ public class DtTests : BaseTest
     [Fact]
     public async Task Should_Permanent_Delete_Dts()
     {
-        var data = await AddAsync(DtFaker.Generate());
+        var data = await AddAsync(Fake<Dt>());
         data = await DeleteAsync(data);
         data = await DeleteAsync(data);
 
@@ -100,3 +107,21 @@ public class DtTests : BaseTest
         Assert.Null(dataFromDb);
     }
 }
+
+// Runs the suite above against every supported provider. Filter with
+// `dotnet test --filter "Provider=Sqlite"` to skip the ones that need a container.
+[Trait("Provider", "Sqlite")]
+[Collection(SqliteCollection.Name)]
+public sealed class DtTestsSqlite(SqliteFixture fixture) : DtTests<SqliteFixture>(fixture);
+
+[Trait("Provider", "MsSql")]
+[Collection(MsSqlCollection.Name)]
+public sealed class DtTestsMsSql(MsSqlFixture fixture) : DtTests<MsSqlFixture>(fixture);
+
+[Trait("Provider", "MySql")]
+[Collection(MySqlCollection.Name)]
+public sealed class DtTestsMySql(MySqlFixture fixture) : DtTests<MySqlFixture>(fixture);
+
+[Trait("Provider", "PostgreSql")]
+[Collection(PostgreSqlCollection.Name)]
+public sealed class DtTestsPostgreSql(PostgreSqlFixture fixture) : DtTests<PostgreSqlFixture>(fixture);

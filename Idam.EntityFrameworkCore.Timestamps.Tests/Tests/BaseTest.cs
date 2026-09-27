@@ -2,44 +2,34 @@ using Idam.EntityFrameworkCore.Timestamps.Tests.Context;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Ekstensions;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Faker;
+using Idam.EntityFrameworkCore.Timestamps.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
 
-public abstract class BaseTest : IDisposable
+/// <summary>
+///     Base class for every test. The fixture decides which provider the test runs against;
+///     each test still gets its own database so the tests stay isolated from one another.
+/// </summary>
+/// <typeparam name="TFixture">The provider fixture.</typeparam>
+public abstract class BaseTest<TFixture> : IDisposable
+    where TFixture : IDbFixture
 {
     protected readonly TestDbContext Context;
-
-    protected readonly BaseEntityFaker<CreatedAtEntity> CreatedAtFaker;
-    protected readonly BaseEntityFaker<CreatedAtUnixEntity> CreatedAtUnixFaker;
-    protected readonly BaseEntityFaker<CreatedAtUtcEntity> CreatedAtUtcFaker;
-    protected readonly BaseEntityFaker<Dt> DtFaker;
-    protected readonly BaseEntityFaker<DtUtc> DtUtcFaker;
-    protected readonly BaseEntityFaker<Unix> UnixFaker;
     protected readonly long UnixMinValue;
-    protected readonly BaseEntityFaker<UpdatedAtEntity> UpdatedAtFaker;
-    protected readonly BaseEntityFaker<UpdatedAtUnixEntity> UpdatedAtUnixFaker;
-    protected readonly BaseEntityFaker<UpdatedAtUtcEntity> UpdatedAtUtcFaker;
-
     protected readonly DateTime UtcMinValue;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="BaseTest" /> class.
+    ///     Initializes a new instance of the <see cref="BaseTest{TFixture}" /> class.
     /// </summary>
-    protected BaseTest()
+    /// <param name="fixture">The provider fixture.</param>
+    protected BaseTest(TFixture fixture)
     {
-        Context = new TestDbContext();
+        // ponytail: one database per test keeps the original isolation, but on SQL Server a
+        // CREATE/DROP DATABASE per test is the slowest part of the run. Swap for a per-class
+        // database plus row cleanup if the suite gets too slow.
+        Context = new TestDbContext(fixture.BuildOptions($"timestamps_test_{Guid.NewGuid():N}"));
         Context.Database.EnsureCreated();
-
-        CreatedAtFaker = new BaseEntityFaker<CreatedAtEntity>();
-        CreatedAtUnixFaker = new BaseEntityFaker<CreatedAtUnixEntity>();
-        CreatedAtUtcFaker = new BaseEntityFaker<CreatedAtUtcEntity>();
-        DtFaker = new BaseEntityFaker<Dt>();
-        DtUtcFaker = new BaseEntityFaker<DtUtc>();
-        UnixFaker = new BaseEntityFaker<Unix>();
-        UpdatedAtFaker = new BaseEntityFaker<UpdatedAtEntity>();
-        UpdatedAtUnixFaker = new BaseEntityFaker<UpdatedAtUnixEntity>();
-        UpdatedAtUtcFaker = new BaseEntityFaker<UpdatedAtUtcEntity>();
 
         UtcMinValue = DateTime.MinValue.ToUniversalTime();
         UnixMinValue = DateTime.MinValue.ToUniversalTime().ToUnixTimeMilliseconds();
@@ -50,6 +40,39 @@ public abstract class BaseTest : IDisposable
         Context.Database.EnsureDeleted();
         Context.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Generates one fake entity.
+    /// </summary>
+    protected static TEntity Fake<TEntity>()
+        where TEntity : BaseEntity
+    {
+        return new BaseEntityFaker<TEntity>().Generate();
+    }
+
+    /// <summary>
+    ///     Generates a list of fake entities.
+    /// </summary>
+    protected static List<TEntity> FakeMany<TEntity>(int count)
+        where TEntity : BaseEntity
+    {
+        return new BaseEntityFaker<TEntity>().Generate(count);
+    }
+
+    /// <summary>
+    ///     Reads an entity back from the database, bypassing the change tracker, so that what the
+    ///     provider actually stored is asserted rather than the in-memory instance.
+    /// </summary>
+    protected async Task<TEntity?> ReloadAsync<TEntity>(int id)
+        where TEntity : BaseEntity
+    {
+        Context.ChangeTracker.Clear();
+
+        return await Context.Set<TEntity>()
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     /// <summary>
