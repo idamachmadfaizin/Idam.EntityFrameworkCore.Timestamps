@@ -113,8 +113,7 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<Unix>>> GetDeletedUnixs()
     {
         return await context.Unixs
-            .IncludeTrashed()
-            .Where(w => w.DeletedAt != null)
+            .OnlyTrashed()
             .ToListAsync();
     }
 
@@ -123,9 +122,8 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<ActionResult<Unix>> GetDeletedUnix(int id)
     {
         var unix = await context.Unixs
-            .IncludeTrashed()
+            .OnlyTrashed()
             .Where(w => w.Id == id)
-            .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
 
         if (unix is null) return NotFound();
@@ -138,9 +136,8 @@ public class UnixsController(MyDbContext context) : ControllerBase
     public async Task<IActionResult> RestoreUnix(int id)
     {
         var entity = await context.Unixs
-            .IncludeTrashed()
+            .OnlyTrashed()
             .Where(w => w.Id == id)
-            .Where(w => w.DeletedAt != null)
             .FirstOrDefaultAsync();
 
         if (entity is null) return NotFound();

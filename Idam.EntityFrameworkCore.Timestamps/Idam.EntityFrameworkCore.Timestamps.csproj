@@ -22,7 +22,6 @@
         <RepositoryType>git</RepositoryType>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageReleaseNotes>Initial release with CreatedAt, UpdatedAt, and DeletedAt support.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

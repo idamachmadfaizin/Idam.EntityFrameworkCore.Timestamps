@@ -67,6 +67,21 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
     }
 
     [Fact]
+    public async Task Should_Set_UpdatedAt_For_A_Change_Detected_Without_An_Explicit_Update()
+    {
+        var data = await AddAsync(Fake<Dt>());
+        var updatedAt = data.UpdatedAt;
+
+        // No Context.Update() here: the entity is already tracked, so the change tracker has to
+        // notice the edit on its own. Every other test marks the entity explicitly.
+        data.Name = Fake<Dt>().Name;
+        await Task.Delay(1);
+        Assert.True(await Context.SaveChangesAsync() > 0);
+
+        Assert.NotEqual(updatedAt, data.UpdatedAt);
+    }
+
+    [Fact]
     public async Task Should_Store_Timestamps_In_Renamed_Columns()
     {
         var data = await AddAsync(Fake<RenamedColumns>());

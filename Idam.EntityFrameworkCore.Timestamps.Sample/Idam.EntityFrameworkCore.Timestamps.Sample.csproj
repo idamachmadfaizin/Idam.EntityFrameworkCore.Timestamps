@@ -14,9 +14,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" />
-        <PackageReference Include="NuGet.Packaging" />
-        <PackageReference Include="NuGet.Protocol" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>
 

@@ -1,5 +1,5 @@
 using Idam.EntityFrameworkCore.Timestamps.Tests.Context;
-using Idam.EntityFrameworkCore.Timestamps.Tests.Ekstensions;
+using Idam.EntityFrameworkCore.Timestamps.Tests.Extensions;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Entities;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Faker;
 using Idam.EntityFrameworkCore.Timestamps.Tests.Fixtures;

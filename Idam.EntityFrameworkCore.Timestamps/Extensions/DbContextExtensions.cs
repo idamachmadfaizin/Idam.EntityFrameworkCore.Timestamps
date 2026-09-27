@@ -16,11 +16,15 @@ public static class DbContextExtensions
         /// </summary>
         public void AddTimestamps()
         {
-            changeTracker.DetectChanges();
-
             var timestamp = DateTimeOffset.Now;
 
-            foreach (var entityEntry in changeTracker.Entries().ToList()) entityEntry.AddTimestamps(timestamp);
+            var entries = changeTracker.Entries()
+                .Where(entry => entry.State is EntityState.Added
+                    or EntityState.Modified
+                    or EntityState.Deleted)
+                .ToList();
+
+            foreach (var entityEntry in entries) entityEntry.AddTimestamps(timestamp);
         }
     }
 
