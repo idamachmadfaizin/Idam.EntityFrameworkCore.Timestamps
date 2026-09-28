@@ -99,3 +99,23 @@ build. Do not add it back as a shortcut when a container feels slow — use
 ## Commit Convention
 
 Format: Conventional Commits.
+
+`CHANGELOG.md` is generated from commit subjects by [git-cliff](https://git-cliff.org)
+(`cliff.toml`), so never edit it by hand — fix `cliff.toml` or the commit instead.
+
+- A `feat`/`fix` subject is a changelog line: write it for package consumers.
+- Breaking change: `feat!:` / `fix!:`, plus a `BREAKING CHANGE:` footer saying what to migrate.
+- Left out: scopes `sample` and `test(s)`, and types `chore`, `docs`, `test`, `ci`, `build`, `style`.
+- Pre-release tags (`-alpha`, `-beta`, `-rc`) fold into the next stable version.
+
+## Release
+
+```bash
+npx git-cliff@2 --tag vX.Y.Z -o CHANGELOG.md
+git commit -am "chore(release): vX.Y.Z"
+git tag vX.Y.Z && git push && git push origin vX.Y.Z
+```
+
+The tag triggers `publish_to_nuget.yml`: tests, NuGet push with the version taken from the tag,
+then a GitHub release whose notes are that version's changelog section. A pre-release tag
+(`vX.Y.Z-alpha1`) needs no changelog commit.

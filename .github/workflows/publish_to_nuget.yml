@@ -61,10 +61,17 @@ jobs:
     runs-on: ubuntu-latest
 
     needs: test
-    
+
+    # Creating the GitHub release needs write access; the rest of the workflow stays read-only.
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          # git-cliff reads the whole history and every tag.
+          fetch-depth: 0
 
       - name: Setup .NET ${{ env.dotnetVersion }}
         uses: actions/setup-dotnet@v5
@@ -97,3 +104,15 @@ jobs:
 
       - name: Publish to NuGet.org
         run: dotnet nuget push ${{ env.srcProjectPath }}/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      # Release notes come from the commits, via cliff.toml. The generator is run in full and
+      # its first section kept, because git-cliff's range flags (--latest, --current) count the
+      # pre-release tags that cliff.toml folds away. At a stable tag the first section is that
+      # version; at a pre-release tag it is everything since the last stable release.
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          npx --yes git-cliff@2 --strip all | awk '/^## \[/{n++; next} n==1' > notes.md
+          prerelease=$([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md $prerelease
