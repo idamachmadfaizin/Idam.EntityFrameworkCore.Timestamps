@@ -33,9 +33,9 @@ public static class ModelBuilderExtensions
             // and rejects it outright on owned types.
             if (mutable.BaseType is not null || mutable.IsOwned()) return;
 
-            if (!typeof(ISoftDelete).IsAssignableFrom(mutable.ClrType) &&
-                !typeof(ISoftDeleteUtc).IsAssignableFrom(mutable.ClrType) &&
-                !typeof(ISoftDeleteUnix).IsAssignableFrom(mutable.ClrType)) return;
+            if (!typeof(ISoftDeleteBase).IsAssignableFrom(mutable.ClrType)) return;
+
+            if (mutable.FindProperty(nameof(ISoftDelete.DeletedAt)) is not { IsNullable: true }) return;
 
             var parameter = Expression.Parameter(mutable.ClrType, "e");
 

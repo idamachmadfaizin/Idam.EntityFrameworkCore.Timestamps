@@ -69,8 +69,12 @@ public abstract class SoftDeleteTests<TFixture>(TFixture fixture) : BaseTest<TFi
     public async Task Should_Delete_Permanently_When_Force_Removed()
     {
         var data = await AddAsync(Fake<Dt>());
+        Clock.Advance(TimeSpan.FromMinutes(1));
 
         Context.Dts.ForceRemove(data);
+
+        // Same clock as the interceptor, in case the marker outlives a failed save.
+        Assert.Equal(Clock.GetUtcNow().LocalDateTime, data.DeletedAt);
         await Context.SaveChangesAsync();
 
         Assert.Null(await ReloadAsync<Dt>(data.Id));

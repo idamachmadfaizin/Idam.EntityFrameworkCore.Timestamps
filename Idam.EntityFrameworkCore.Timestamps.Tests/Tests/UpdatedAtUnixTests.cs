@@ -26,7 +26,7 @@ public abstract class UpdatedAtUnixTests<TFixture>(TFixture fixture) : BaseTest<
         data.Name = Fake<UpdatedAtUnixEntity>().Name;
 
         Context.Update(data);
-        await Task.Delay(1);
+        Clock.Advance(TimeSpan.FromSeconds(1));
         var updated = await Context.SaveChangesAsync();
 
         Assert.True(updated > 0);

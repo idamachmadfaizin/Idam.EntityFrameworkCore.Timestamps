@@ -15,7 +15,10 @@ namespace Idam.EntityFrameworkCore.Timestamps.Tests.Tests;
 public abstract class BaseTest<TFixture> : IDisposable
     where TFixture : IDbFixture
 {
+    // Whole seconds, so Unix milliseconds and microsecond columns store it exactly.
+    protected readonly TestClock Clock = new(new DateTimeOffset(2026, 1, 2, 3, 4, 5, TimeSpan.Zero));
     protected readonly TestDbContext Context;
+    private readonly DbContextOptions<TestDbContext> _options;
     protected readonly long UnixMinValue;
     protected readonly DateTime UtcMinValue;
 
@@ -28,7 +31,8 @@ public abstract class BaseTest<TFixture> : IDisposable
         // ponytail: one database per test keeps the original isolation, but on SQL Server a
         // CREATE/DROP DATABASE per test is the slowest part of the run. Swap for a per-class
         // database plus row cleanup if the suite gets too slow.
-        Context = new TestDbContext(fixture.BuildOptions($"timestamps_test_{Guid.NewGuid():N}"));
+        _options = fixture.BuildOptions($"timestamps_test_{Guid.NewGuid():N}");
+        Context = new TestDbContext(_options, Clock);
         Context.Database.EnsureCreated();
 
         UtcMinValue = DateTime.MinValue.ToUniversalTime();
@@ -40,6 +44,18 @@ public abstract class BaseTest<TFixture> : IDisposable
         Context.Database.EnsureDeleted();
         Context.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     A second context on this test's database, registering the parameterless interceptor instead
+    ///     of <see cref="Clock" />, so the clock comes from whatever <paramref name="configure" /> sets up.
+    /// </summary>
+    protected TestDbContext CreateContext(Action<DbContextOptionsBuilder<TestDbContext>>? configure = null)
+    {
+        var builder = new DbContextOptionsBuilder<TestDbContext>(_options);
+        configure?.Invoke(builder);
+
+        return new TestDbContext(builder.Options, null);
     }
 
     /// <summary>

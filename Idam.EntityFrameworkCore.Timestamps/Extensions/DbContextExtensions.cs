@@ -1,4 +1,5 @@
-﻿using Idam.EntityFrameworkCore.Timestamps.Interfaces;
+﻿using Idam.EntityFrameworkCore.Timestamps.Interceptors;
+using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -12,11 +13,28 @@ public static class DbContextExtensions
     extension(ChangeTracker changeTracker)
     {
         /// <summary>
-        ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+        ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted,
+        ///     reading the context's clock: a TimeStampsInterceptor registered with a <see cref="TimeProvider" />,
+        ///     else the application's <see cref="TimeProvider" /> service, else the system clock.
         /// </summary>
         public void AddTimestamps()
         {
-            var timestamp = DateTimeOffset.Now;
+            changeTracker.AddTimestamps(TimeStampsInterceptor.ResolveTimeProvider(changeTracker.Context));
+        }
+
+        /// <summary>
+        ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
+        /// </summary>
+        /// <param name="timeProvider">
+        ///     The clock the timestamps are read from. Local-time interfaces convert with its
+        ///     <see cref="TimeProvider.LocalTimeZone" />: Kind is Local when that is the machine's zone, and
+        ///     Unspecified otherwise.
+        /// </param>
+        public void AddTimestamps(TimeProvider timeProvider)
+        {
+            ArgumentNullException.ThrowIfNull(timeProvider);
+
+            var now = Timestamp.Now(timeProvider);
 
             var entries = changeTracker.Entries()
                 .Where(entry => entry.State is EntityState.Added
@@ -24,7 +42,7 @@ public static class DbContextExtensions
                     or EntityState.Deleted)
                 .ToList();
 
-            foreach (var entityEntry in entries) entityEntry.AddTimestamps(timestamp);
+            foreach (var entityEntry in entries) entityEntry.AddTimestamps(now);
         }
     }
 
@@ -33,8 +51,8 @@ public static class DbContextExtensions
         /// <summary>
         ///     Add timestamps to the Entity with TimeStampsAttribute when state is Added or Modified or Deleted.
         /// </summary>
-        /// <param name="timestamp">The timestamp shared by every entity in the current save.</param>
-        private void AddTimestamps(DateTimeOffset timestamp)
+        /// <param name="now">The timestamp shared by every entity in the current save.</param>
+        private void AddTimestamps(Timestamp now)
         {
             if (entityEntry is null) return;
 
@@ -42,11 +60,11 @@ public static class DbContextExtensions
             {
                 case EntityState.Added:
                 case EntityState.Modified:
-                    UpdateTimeStamps(entityEntry, timestamp);
+                    UpdateTimeStamps(entityEntry, now);
                     break;
 
                 case EntityState.Deleted:
-                    UpdateSoftDelete(entityEntry, timestamp);
+                    UpdateSoftDelete(entityEntry, now);
                     break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:
@@ -60,33 +78,35 @@ public static class DbContextExtensions
     ///     Updates the time stamps.
     /// </summary>
     /// <param name="entityEntry">The entity entry.</param>
-    /// <param name="timestamp">The timestamp shared by every entity in the current save.</param>
-    private static void UpdateTimeStamps(EntityEntry entityEntry, DateTimeOffset timestamp)
+    /// <param name="now">The timestamp shared by every entity in the current save.</param>
+    private static void UpdateTimeStamps(EntityEntry entityEntry, Timestamp now)
     {
         if (entityEntry.State is not EntityState.Added and not EntityState.Modified) return;
         if (entityEntry.Entity is not ITimeStampBase) return;
 
-        var now = timestamp.LocalDateTime;
-        var nowUtc = timestamp.UtcDateTime;
-        var nowUnix = timestamp.ToUnixTimeMilliseconds();
-
         switch (entityEntry.Entity)
         {
             case ITimeStamps timeStamps:
-                timeStamps.UpdatedAt = now;
-                if (entityEntry.State == EntityState.Added) timeStamps.CreatedAt = now;
+                timeStamps.UpdatedAt = now.Local;
+                if (entityEntry.State == EntityState.Added) timeStamps.CreatedAt = now.Local;
 
                 break;
 
             case ITimeStampsUtc timeStampsUtc:
-                timeStampsUtc.UpdatedAt = nowUtc;
-                if (entityEntry.State == EntityState.Added) timeStampsUtc.CreatedAt = nowUtc;
+                timeStampsUtc.UpdatedAt = now.Utc;
+                if (entityEntry.State == EntityState.Added) timeStampsUtc.CreatedAt = now.Utc;
 
                 break;
 
             case ITimeStampsUnix timeStampsUnix:
-                timeStampsUnix.UpdatedAt = nowUnix;
-                if (entityEntry.State == EntityState.Added) timeStampsUnix.CreatedAt = nowUnix;
+                timeStampsUnix.UpdatedAt = now.Unix;
+                if (entityEntry.State == EntityState.Added) timeStampsUnix.CreatedAt = now.Unix;
+
+                break;
+
+            case ITimeStampsOffset timeStampsOffset:
+                timeStampsOffset.UpdatedAt = now.Offset;
+                if (entityEntry.State == EntityState.Added) timeStampsOffset.CreatedAt = now.Offset;
 
                 break;
 
@@ -96,13 +116,16 @@ public static class DbContextExtensions
                     switch (entityEntry.Entity)
                     {
                         case ICreatedAt createdAt:
-                            createdAt.CreatedAt = now;
+                            createdAt.CreatedAt = now.Local;
                             break;
                         case ICreatedAtUtc createdAtUtc:
-                            createdAtUtc.CreatedAt = nowUtc;
+                            createdAtUtc.CreatedAt = now.Utc;
                             break;
                         case ICreatedAtUnix createdAtUnix:
-                            createdAtUnix.CreatedAt = nowUnix;
+                            createdAtUnix.CreatedAt = now.Unix;
+                            break;
+                        case ICreatedAtOffset createdAtOffset:
+                            createdAtOffset.CreatedAt = now.Offset;
                             break;
                     }
                 }
@@ -110,13 +133,16 @@ public static class DbContextExtensions
                 switch (entityEntry.Entity)
                 {
                     case IUpdatedAt updatedAt:
-                        updatedAt.UpdatedAt = now;
+                        updatedAt.UpdatedAt = now.Local;
                         break;
                     case IUpdatedAtUtc updatedAtUtc:
-                        updatedAtUtc.UpdatedAt = nowUtc;
+                        updatedAtUtc.UpdatedAt = now.Utc;
                         break;
                     case IUpdatedAtUnix updatedAtUnix:
-                        updatedAtUnix.UpdatedAt = nowUnix;
+                        updatedAtUnix.UpdatedAt = now.Unix;
+                        break;
+                    case IUpdatedAtOffset updatedAtOffset:
+                        updatedAtOffset.UpdatedAt = now.Offset;
                         break;
                 }
 
@@ -128,26 +154,10 @@ public static class DbContextExtensions
     ///     Updates the soft delete.
     /// </summary>
     /// <param name="entityEntry">The entity entry.</param>
-    /// <param name="timestamp">The timestamp shared by every entity in the current save.</param>
-    private static void UpdateSoftDelete(EntityEntry entityEntry, DateTimeOffset timestamp)
+    /// <param name="now">The timestamp shared by every entity in the current save.</param>
+    private static void UpdateSoftDelete(EntityEntry entityEntry, Timestamp now)
     {
         if (entityEntry.State is not EntityState.Deleted) return;
-        if (entityEntry.Entity is not ISoftDeleteBase) return;
-
-        switch (entityEntry.Entity)
-        {
-            case ISoftDelete { DeletedAt: null } softDelete:
-                entityEntry.State = EntityState.Modified;
-                softDelete.DeletedAt = timestamp.LocalDateTime;
-                break;
-            case ISoftDeleteUtc { DeletedAt: null } softDeleteUtc:
-                entityEntry.State = EntityState.Modified;
-                softDeleteUtc.DeletedAt = timestamp.UtcDateTime;
-                break;
-            case ISoftDeleteUnix { DeletedAt: null } softDeleteUnix:
-                entityEntry.State = EntityState.Modified;
-                softDeleteUnix.DeletedAt = timestamp.ToUnixTimeMilliseconds();
-                break;
-        }
+        if (SoftDeleteFormats.TryStamp(entityEntry.Entity, now)) entityEntry.State = EntityState.Modified;
     }
 }

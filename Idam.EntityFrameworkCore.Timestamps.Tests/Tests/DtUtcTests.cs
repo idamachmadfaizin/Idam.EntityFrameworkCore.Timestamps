@@ -33,7 +33,7 @@ public abstract class DtUtcTests<TFixture>(TFixture fixture) : BaseTest<TFixture
         data.Name = Fake<DtUtc>().Name;
 
         Context.Update(data);
-        await Task.Delay(1);
+        Clock.Advance(TimeSpan.FromSeconds(1));
         var updated = await Context.SaveChangesAsync();
 
         Assert.True(updated > 0);

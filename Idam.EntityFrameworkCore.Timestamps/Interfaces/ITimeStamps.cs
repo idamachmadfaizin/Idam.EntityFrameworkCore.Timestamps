@@ -16,3 +16,8 @@ public interface ITimeStampsUtc : ICreatedAtUtc, IUpdatedAtUtc;
 ///     Timestamps interface using Unix format
 /// </summary>
 public interface ITimeStampsUnix : ICreatedAtUnix, IUpdatedAtUnix;
+
+/// <summary>
+///     Timestamps interface using DateTimeOffset format, always written with offset zero (UTC).
+/// </summary>
+public interface ITimeStampsOffset : ICreatedAtOffset, IUpdatedAtOffset;

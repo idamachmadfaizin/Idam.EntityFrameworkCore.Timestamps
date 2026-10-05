@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Tests.Context;
 
-public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(options)
+public class TestDbContext(DbContextOptions<TestDbContext> options, TimeProvider? clock) : DbContext(options)
 {
     public DbSet<Dt> Dts { get; init; }
     public DbSet<DtUtc> DtUtcs { get; init; }
+    public DbSet<DtOffset> DtOffsets { get; init; }
+    public DbSet<CreatedUpdatedOffset> CreatedUpdatedOffsets { get; init; }
     public DbSet<Unix> Unixs { get; init; }
     public DbSet<CreatedAtEntity> CreatedAts { get; init; }
     public DbSet<CreatedAtUnixEntity> CreatedAtUnixs { get; init; }
@@ -24,7 +26,9 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.AddTimeStampsInterceptor();
+        // Without a clock: the parameterless registration most applications use.
+        if (clock is null) optionsBuilder.AddTimeStampsInterceptor();
+        else optionsBuilder.AddTimeStampsInterceptor(clock);
         base.OnConfiguring(optionsBuilder);
     }
 

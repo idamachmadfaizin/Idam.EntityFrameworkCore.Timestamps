@@ -28,3 +28,11 @@ public interface ISoftDeleteUnix : ISoftDeleteBase
 {
     long? DeletedAt { get; set; }
 }
+
+/// <summary>
+///     SoftDelete interface using DateTimeOffset format, always written with offset zero (UTC).
+/// </summary>
+public interface ISoftDeleteOffset : ISoftDeleteBase
+{
+    DateTimeOffset? DeletedAt { get; set; }
+}

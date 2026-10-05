@@ -16,5 +16,15 @@ public static class DbContextOptionsBuilderExtensions
         {
             optionsBuilder.AddInterceptors(_timeStampsInterceptor);
         }
+
+        /// <summary>
+        ///     Add TimeStampsInterceptor to the DbContextOptionsBuilder, reading the time from
+        ///     <paramref name="timeProvider" /> instead of the system clock.
+        /// </summary>
+        /// <param name="timeProvider">The clock the timestamps are read from.</param>
+        public void AddTimeStampsInterceptor(TimeProvider timeProvider)
+        {
+            optionsBuilder.AddInterceptors(new TimeStampsInterceptor(timeProvider));
+        }
     }
 }

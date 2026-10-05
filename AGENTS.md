@@ -2,7 +2,7 @@
 
 ## Project
 
-NuGet library for EF Core entity timestamps (CreatedAt, UpdatedAt, DeletedAt) and soft delete. Supports three timestamp formats: Local DateTime, UTC DateTime, and Unix milliseconds.
+NuGet library for EF Core entity timestamps (CreatedAt, UpdatedAt, DeletedAt) and soft delete. Supports four timestamp formats: Local DateTime, UTC DateTime, DateTimeOffset (written in UTC), and Unix milliseconds. The clock is injectable via `TimeProvider`.
 
 ## SDK & TFM
 
@@ -49,6 +49,7 @@ Central Package Management enabled. All NuGet versions are in `Directory.Package
 - Framework: xUnit with `[Fact]`
 - Test data: `Bogus`, via `BaseTest.Fake<T>()` / `FakeMany<T>(n)` (wrapping `BaseEntityFaker<T>`)
 - Global usings in `Usings.cs` — only `global using Xunit`
+- Time: `BaseTest.Clock` (a `TestClock` passed to `AddTimeStampsInterceptor`) stands still until a test calls `Clock.Advance(...)`. Never use `Task.Delay` to make timestamps differ; assert exact values against `Clock.GetUtcNow()` instead
 
 ### Provider matrix
 
@@ -94,7 +95,9 @@ build. Do not add it back as a shortcut when a container feels slow — use
 - Soft delete logic in `DbContextExtensions.UpdateSoftDelete` — converts `Deleted` state to `Modified` with `DeletedAt` set
 - Soft delete query filter registered via `ModelBuilder.AddSoftDeleteFilter()`, named `"Idam.EntityFrameworkCore.Timestamps.SoftDelete"` (in `SoftDeleteFilters.Default`)
 - `IncludeTrashed()` uses `IgnoreQueryFilters` with the named filter to selectively bypass soft-delete while leaving other filters active
-- Interfaces hierarchy: `ITimeStampBase` → `ICreatedAt`/`IUpdatedAt`/`ITimeStamps`, `ISoftDeleteBase` → `ISoftDelete`/`ISoftDeleteUtc`/`ISoftDeleteUnix`
+- Interfaces hierarchy: `ITimeStampBase` → `ICreatedAt`/`IUpdatedAt`/`ITimeStamps` (each with `Utc`, `Offset` and `Unix` variants), `ISoftDeleteBase` → `ISoftDelete`/`ISoftDeleteUtc`/`ISoftDeleteOffset`/`ISoftDeleteUnix`
+- Per-format logic lives in two places only: `UpdateTimeStamps` (CreatedAt/UpdatedAt) and `SoftDeleteFormats` (DeletedAt). `OnlyTrashed()` and `AddSoftDeleteFilter()` work off the `DeletedAt` property and do not depend on the format — keep it that way
+- Clock: `Timestamp.Now(TimeProvider)` computes every format once per save. Every path without an explicit `TimeProvider` goes through `TimeStampsInterceptor.ResolveTimeProvider` (explicit interceptor clock → DI `TimeProvider` → system), so the interceptor, `AddTimestamps()` and `ForceRemove()` never disagree
 
 ## Commit Convention
 

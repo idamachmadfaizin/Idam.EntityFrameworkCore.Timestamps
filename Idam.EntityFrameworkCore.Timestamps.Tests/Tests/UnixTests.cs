@@ -30,7 +30,7 @@ public abstract class UnixTests<TFixture>(TFixture fixture) : BaseTest<TFixture>
         data.Name = Fake<Unix>().Name;
 
         Context.Update(data);
-        await Task.Delay(1);
+        Clock.Advance(TimeSpan.FromSeconds(1));
         var updated = await Context.SaveChangesAsync();
 
         Assert.True(updated > 0);

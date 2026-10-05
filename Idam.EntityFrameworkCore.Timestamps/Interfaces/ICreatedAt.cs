@@ -23,3 +23,11 @@ public interface ICreatedAtUnix : ITimeStampBase
 {
     long CreatedAt { get; set; }
 }
+
+/// <summary>
+///     CreatedAt interface using DateTimeOffset format, always written with offset zero (UTC).
+/// </summary>
+public interface ICreatedAtOffset : ITimeStampBase
+{
+    DateTimeOffset CreatedAt { get; set; }
+}

@@ -15,8 +15,8 @@
         <Authors>Idam Achmad Faizin</Authors>
         <Copyright>Copyright © Idam Achmad Faizin 2025</Copyright>
 
-        <Description>A .NET library for entity timestamps and softdelete. Easily manage CreatedAt, UpdatedAt, and DeletedAt fields with support for DateTime, UTC DateTime, and Unix time (milliseconds).</Description>
-        <PackageTags>Timestamps;Softdelete;CreatedAt;UpdatedAt;DeletedAt</PackageTags>
+        <Description>A .NET library for entity timestamps and softdelete. Easily manage CreatedAt, UpdatedAt, and DeletedAt fields with support for DateTime, UTC DateTime, DateTimeOffset, and Unix time (milliseconds).</Description>
+        <PackageTags>Timestamps;Softdelete;CreatedAt;UpdatedAt;DeletedAt;DateTimeOffset;TimeProvider</PackageTags>
         <PackageProjectUrl>https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps</PackageProjectUrl>
         <RepositoryUrl>https://github.com/idamachmadfaizin/Idam.EntityFrameworkCore.Timestamps</RepositoryUrl>
         <RepositoryType>git</RepositoryType>

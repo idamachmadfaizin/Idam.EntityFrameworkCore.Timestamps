@@ -14,6 +14,8 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
     [Fact]
     public async Task Should_Use_One_Timestamp_For_Every_Entity_In_A_Single_Save()
     {
+        Clock.Step = TimeSpan.FromMilliseconds(1);
+
         var datas = await AddRangeAsync(FakeMany<Dt>(50));
 
         Assert.Single(datas.Select(x => x.CreatedAt).Distinct());
@@ -23,9 +25,28 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
     [Fact]
     public async Task Should_Use_One_Timestamp_For_Every_Entity_In_A_Single_Save_Unix()
     {
+        Clock.Step = TimeSpan.FromMilliseconds(1);
+
         var datas = await AddRangeAsync(FakeMany<Unix>(50));
 
         Assert.Single(datas.Select(x => x.CreatedAt).Distinct());
+    }
+
+    [Fact]
+    public async Task Should_Set_Individual_Offset_Interfaces_And_Keep_CreatedAt_On_Update()
+    {
+        var createdAt = Clock.GetUtcNow();
+        var data = await AddAsync(Fake<CreatedUpdatedOffset>());
+
+        Assert.Equal(createdAt, data.CreatedAt);
+        Assert.Equal(createdAt, data.UpdatedAt);
+
+        Clock.Advance(TimeSpan.FromSeconds(1));
+        data.Name = Fake<CreatedUpdatedOffset>().Name;
+        Assert.True(await Context.SaveChangesAsync() > 0);
+
+        Assert.Equal(createdAt, data.CreatedAt);
+        Assert.Equal(Clock.GetUtcNow(), data.UpdatedAt);
     }
 
     [Fact]
@@ -48,7 +69,7 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
 
         data.Name = Fake<MixedTimeStamps>().Name;
         Context.Update(data);
-        await Task.Delay(1);
+        Clock.Advance(TimeSpan.FromSeconds(1));
         Assert.True(await Context.SaveChangesAsync() > 0);
 
         Assert.Equal(createdAt, data.CreatedAt);
@@ -75,7 +96,7 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
         // No Context.Update() here: the entity is already tracked, so the change tracker has to
         // notice the edit on its own. Every other test marks the entity explicitly.
         data.Name = Fake<Dt>().Name;
-        await Task.Delay(1);
+        Clock.Advance(TimeSpan.FromSeconds(1));
         Assert.True(await Context.SaveChangesAsync() > 0);
 
         Assert.NotEqual(updatedAt, data.UpdatedAt);
@@ -89,8 +110,8 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
         var stored = await ReloadAsync<RenamedColumns>(data.Id);
 
         Assert.NotNull(stored);
-        Assert.Equal(data.CreatedAt, stored.CreatedAt, TimeSpan.FromSeconds(1));
-        Assert.Equal(data.UpdatedAt, stored.UpdatedAt, TimeSpan.FromSeconds(1));
+        Assert.Equal(data.CreatedAt, stored.CreatedAt);
+        Assert.Equal(data.UpdatedAt, stored.UpdatedAt);
         Assert.Null(stored.DeletedAt);
     }
 
@@ -110,10 +131,23 @@ public abstract class TimeStampsTests<TFixture>(TFixture fixture) : BaseTest<TFi
         Assert.NotNull(storedUnix);
 
         // Kind is deliberately not asserted here: no provider persists it, so a UTC entity
-        // comes back as Unspecified. Only the instant itself survives the roundtrip.
-        Assert.Equal(local.CreatedAt, storedLocal.CreatedAt, TimeSpan.FromSeconds(1));
-        Assert.Equal(utc.CreatedAt, storedUtc.CreatedAt, TimeSpan.FromSeconds(1));
+        // comes back as Unspecified. DateTime equality compares ticks only, which is the point.
+        Assert.Equal(local.CreatedAt, storedLocal.CreatedAt);
+        Assert.Equal(utc.CreatedAt, storedUtc.CreatedAt);
         Assert.Equal(unix.CreatedAt, storedUnix.CreatedAt);
+    }
+
+    [Fact]
+    public async Task Should_Persist_A_Sub_Second_DateTime_To_The_Column_Precision()
+    {
+        // 100ns ticks, finer than the microsecond columns of SQL Server, MySQL and PostgreSQL.
+        Clock.Advance(TimeSpan.FromTicks(1_234_567));
+        var data = await AddAsync(Fake<DtUtc>());
+
+        var stored = await ReloadAsync<DtUtc>(data.Id);
+
+        Assert.NotNull(stored);
+        Assert.Equal(data.CreatedAt, stored.CreatedAt, TimeSpan.FromMicroseconds(1));
     }
 }
 

@@ -1,6 +1,8 @@
+using Idam.EntityFrameworkCore.Timestamps.Interceptors;
 using Idam.EntityFrameworkCore.Timestamps.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Idam.EntityFrameworkCore.Timestamps.Extensions;
 
@@ -21,18 +23,7 @@ public static class DbSetExtensions
             ArgumentNullException.ThrowIfNull(dbSet);
             ArgumentNullException.ThrowIfNull(entity);
 
-            switch (entity)
-            {
-                case ISoftDelete softDelete:
-                    softDelete.DeletedAt = null;
-                    break;
-                case ISoftDeleteUtc softDeleteUtc:
-                    softDeleteUtc.DeletedAt = null;
-                    break;
-                case ISoftDeleteUnix softDeleteUnix:
-                    softDeleteUnix.DeletedAt = null;
-                    break;
-            }
+            SoftDeleteFormats.Restore(entity);
 
             // Update() attaches the entity when it is not tracked yet; without it a detached
             // or no-tracking entity is cleared in memory only and SaveChanges() writes nothing.
@@ -50,18 +41,8 @@ public static class DbSetExtensions
             ArgumentNullException.ThrowIfNull(dbSet);
             ArgumentNullException.ThrowIfNull(entity);
 
-            switch (entity)
-            {
-                case ISoftDelete softDelete:
-                    softDelete.DeletedAt = DateTime.Now;
-                    break;
-                case ISoftDeleteUtc softDeleteUtc:
-                    softDeleteUtc.DeletedAt = DateTime.UtcNow;
-                    break;
-                case ISoftDeleteUnix softDeleteUnix:
-                    softDeleteUnix.DeletedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    break;
-            }
+            var context = dbSet.GetService<ICurrentDbContext>().Context;
+            SoftDeleteFormats.TryStamp(entity, Timestamp.Now(TimeStampsInterceptor.ResolveTimeProvider(context)));
 
             return dbSet.Remove(entity);
         }

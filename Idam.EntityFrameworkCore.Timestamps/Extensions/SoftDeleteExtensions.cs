@@ -17,13 +17,7 @@ public static class SoftDeleteExtensions
         {
             ArgumentNullException.ThrowIfNull(entity);
 
-            return entity switch
-            {
-                ISoftDelete { DeletedAt: not null } => true,
-                ISoftDeleteUtc { DeletedAt: not null } => true,
-                ISoftDeleteUnix { DeletedAt: not null } => true,
-                _ => false
-            };
+            return SoftDeleteFormats.IsTrashed(entity);
         }
     }
 }
